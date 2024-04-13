@@ -81,6 +81,7 @@ class UserController extends AbstractController
         $jsonUserList = $serializer->serialize($userList, 'json', ['groups' => 'getPlayers']);
         $response = [
             'message' => 'List of all users',
+            'number_of_users' => count($userList),
             'status' => Response::HTTP_OK,
             'users' => json_decode($jsonUserList, true)
         ];
