@@ -159,6 +159,10 @@ class RegistrationController extends AbstractController
             throw new HttpException(Response::HTTP_NOT_FOUND, 'Registration not found');
         }
 
+        if ($registration->getTournament()->getId() !== $tournament->getId()) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Registration does not belong to the tournament');
+        }
+
         if ($currentUser->getId() !== $registration->getPlayer()->getId() &&
             $currentUser->getId() !== $tournament->getOrganizer()->getId() &&
             !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
