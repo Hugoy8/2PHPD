@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -73,6 +74,7 @@ class UserController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players', name: 'allPlayers', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: "Only admins can access this route")]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
         $userList = $userRepository->findAll();
@@ -117,6 +119,11 @@ class UserController extends AbstractController
     public function updateUser(Request $request, User $user, SerializerInterface $serializer, ValidatorInterface $validator,
                                UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): JsonResponse
     {
+        $currentUser = $this->getUser();
+        if ($currentUser->getId() !== $user->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
+            throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot update another user");
+        }
+
         $updatedUser = $serializer->deserialize($request->getContent(), User::class, 'json', ['object_to_populate' => $user]);
 
         $errors = $validator->validate($user);
@@ -146,6 +153,11 @@ class UserController extends AbstractController
     #[Route('players/{id}', name: 'deletePlayer', methods: ['DELETE'])]
     public function deleteUser(User $user, EntityManagerInterface $em): JsonResponse
     {
+        $currentUser = $this->getUser();
+        if ($currentUser->getId() !== $user->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
+            throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot delete another user");
+        }
+
         $em->remove($user);
         $em->flush();
         $response = [

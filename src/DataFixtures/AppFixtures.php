@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Tournament;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -29,6 +30,17 @@ class AppFixtures extends Fixture
         $user->setStatus('active');
         $manager->persist($user);
 
+        // Création d'un utilisateur
+        $user2 = new User();
+        $user2->setFirstName('Adrien');
+        $user2->setLastName('Czesnalowicz');
+        $user2->setEmailAddress('user2@bookapi.com');
+        $user2->setUsername('Hugoy');
+        $user2->setRoles(['ROLE_USER']);
+        $user2->setPassword($this->userPasswordHasher->hashPassword($user2, 'password'));
+        $user2->setStatus('active');
+        $manager->persist($user2);
+
         // Création d'un admin
         $userAdmin = new User();
         $userAdmin->setFirstName('Hugo');
@@ -39,6 +51,29 @@ class AppFixtures extends Fixture
         $userAdmin->setPassword($this->userPasswordHasher->hashPassword($userAdmin, 'password'));
         $userAdmin->setStatus('active');
         $manager->persist($userAdmin);
+
+        // Création de tournois
+        $tournament1 = new Tournament();
+        $tournament1->setTournamentName('Tournoi de foot');
+        $tournament1->setStartDate(new \DateTime('2022-01-01'));
+        $tournament1->setEndDate(new \DateTime('2022-01-02'));
+        $tournament1->setLocation('Stade de France');
+        $tournament1->setDescription('Tournoi de foot amateur');
+        $tournament1->setMaxParticipants(22);
+        $tournament1->setSport('Football');
+        $tournament1->setOrganizer($user);
+        $manager->persist($tournament1);
+
+        $tournament2 = new Tournament();
+        $tournament2->setTournamentName('Tournoi de tennis');
+        $tournament2->setStartDate(new \DateTime('2024-06-06'));
+        $tournament2->setEndDate(new \DateTime('2024-07-07'));
+        $tournament2->setLocation('Open Australie');
+        $tournament2->setDescription('Tournoi de tennis amateur');
+        $tournament2->setMaxParticipants(10);
+        $tournament2->setSport('Tennis');
+        $tournament2->setOrganizer($user2);
+        $manager->persist($tournament2);
 
         $manager->flush();
     }
