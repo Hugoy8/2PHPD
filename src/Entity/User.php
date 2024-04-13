@@ -19,30 +19,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['getPlayers'])]
+    #[Groups(['getPlayers', 'getTournaments'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlayers'])]
+    #[Groups(['getPlayers', 'getTournaments'])]
     #[Assert\NotBlank(message: 'First name is required')]
     #[Assert\Length(min: 1, max: 255, minMessage: 'The first name must be at least 1 character long', maxMessage: 'The first name must be at most 255 characters long')]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlayers'])]
+    #[Groups(['getPlayers', 'getTournaments'])]
     #[Assert\NotBlank(message: 'Last name is required')]
     #[Assert\Length(min: 1, max: 255, minMessage: 'The last name must be at least 1 character long', maxMessage: 'The last name must be at most 255 characters long')]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['getPlayers'])]
+    #[Groups(['getPlayers', 'getTournaments'])]
     #[Assert\NotBlank(message: 'Email address is required')]
     #[Assert\Length(min: 1, max: 180, minMessage: 'The email address must be at least 1 character long', maxMessage: 'The email address must be at most 180 characters long')]
     #[Assert\Email(message: 'The email address is not valid')]
     private ?string $emailAddress = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getPlayers'])]
+    #[Groups(['getPlayers', 'getTournaments'])]
     #[Assert\NotBlank(message: 'Username is required')]
     #[Assert\Length(min: 1, max: 255, minMessage: 'The username must be at least 1 character long', maxMessage: 'The username must be at most 255 characters long')]
     private ?string $username = null;
@@ -55,7 +55,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(['getPlayers'])]
+    #[Groups(['getPlayers', 'getTournaments'])]
     private array $roles = [];
 
     /**
