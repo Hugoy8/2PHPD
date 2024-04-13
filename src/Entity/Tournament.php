@@ -10,18 +10,18 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TournamentRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_TOURNAMENT_NAME', columns: ['tournamentName'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_TOURNAMENT_NAME', columns: ['tournament_name'])]
 #[UniqueEntity(fields: ['tournamentName'], message: 'Tournament name already taken')]
 class Tournament
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     #[Assert\NotBlank(message: 'Tournament name is required')]
     #[Assert\Length(min: 1, max: 255,
         minMessage: 'The tournament name must be at least 1 character long',
@@ -29,7 +29,7 @@ class Tournament
     private ?string $tournamentName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     #[Assert\NotBlank(message: 'Start date is required')]
     #[Assert\Expression(
         expression: 'this.getEndDate() >= value',
@@ -38,7 +38,7 @@ class Tournament
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     #[Assert\NotBlank(message: 'End date is required')]
     #[Assert\Expression(
         expression: 'this.getStartDate() <= value',
@@ -47,24 +47,24 @@ class Tournament
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     #[Assert\Length(min: 1, max: 255,
         minMessage: 'The location must be at least 1 character long',
         maxMessage: 'The location must be at most 255 characters long')]
     private ?string $location = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     #[Assert\NotBlank(message: 'Description is required')]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     #[Assert\NotBlank(message: 'maxParticipants is required')]
     private ?int $maxParticipants = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     #[Assert\NotBlank(message: 'Sport is required')]
     #[Assert\Length(min: 1, max: 255,
         minMessage: 'The sport must be at least 1 character long',
@@ -73,11 +73,11 @@ class Tournament
 
     #[ORM\ManyToOne(cascade: ["persist"])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     private ?User $organizer = null;
 
     #[ORM\ManyToOne(cascade: ["persist"])]
-    #[Groups(['getTournaments'])]
+    #[Groups(['getTournaments', 'getRegistrations'])]
     private ?User $winner = null;
 
     public function getId(): ?int
@@ -206,4 +206,6 @@ class Tournament
             return 'Finished';
         }
     }
+
+
 }

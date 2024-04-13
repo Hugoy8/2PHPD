@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Registration;
 use App\Entity\Tournament;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -74,6 +75,21 @@ class AppFixtures extends Fixture
         $tournament2->setSport('Tennis');
         $tournament2->setOrganizer($user2);
         $manager->persist($tournament2);
+
+        // Création d'inscriptions
+        $registration1 = new Registration();
+        $registration1->setPlayer($user);
+        $registration1->setTournament($tournament1);
+        $registration1->setRegistrationDate(new \DateTime('2021-12-01'));
+        $registration1->setStatus('registered');
+        $manager->persist($registration1);
+
+        $registration2 = new Registration();
+        $registration2->setPlayer($user2);
+        $registration2->setTournament($tournament2);
+        $registration2->setRegistrationDate(new \DateTime('2023-06-06'));
+        $registration2->setStatus('registered');
+        $manager->persist($registration2);
 
         $manager->flush();
     }

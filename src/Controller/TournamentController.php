@@ -60,9 +60,9 @@ class TournamentController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('tournaments', name: 'allTournaments', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN', message: "Only admins can access this route")]
     public function getAllTournaments(TournamentRepository $tournamentRepository, SerializerInterface $serializer): JsonResponse
     {
+
         $tournamentList = $tournamentRepository->findAll();
 
         foreach ($tournamentList as $tournament) {
@@ -73,6 +73,7 @@ class TournamentController extends AbstractController
 
         $response = [
             'message' => 'List of all tournaments',
+            'number_of_tournaments' => count($tournamentList),
             'status' => Response::HTTP_OK,
             'tournaments' => json_decode($jsonTournamentList, true)
         ];
@@ -151,6 +152,11 @@ class TournamentController extends AbstractController
         return new JsonResponse($response, Response::HTTP_OK);
     }
 
+    /**
+     * @param Tournament $tournament // Tournament object
+     * @param EntityManagerInterface $em // EntityManagerInterface object
+     * @return JsonResponse // JsonResponse object
+     */
     #[Route('tournaments/{id}', name: 'deleteTournament', methods: ['DELETE'])]
     public function deleteTournament(Tournament $tournament, EntityManagerInterface $em): JsonResponse
     {
