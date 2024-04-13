@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -73,6 +74,7 @@ class UserController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players', name: 'allPlayers', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: "Only admins can access this route")]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
         $userList = $userRepository->findAll();
@@ -92,6 +94,7 @@ class UserController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players/{id}', name: 'playerById', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: "Only admins can access this route")]
     public function getUserById(User $user, SerializerInterface $serializer): JsonResponse
     {
         $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getPlayers']);
@@ -114,6 +117,7 @@ class UserController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players/{id}', name: 'updatePlayer', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: "Only admins can access this route")]
     public function updateUser(Request $request, User $user, SerializerInterface $serializer, ValidatorInterface $validator,
                                UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): JsonResponse
     {
@@ -144,6 +148,7 @@ class UserController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players/{id}', name: 'deletePlayer', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: "Only admins can access this route")]
     public function deleteUser(User $user, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($user);
