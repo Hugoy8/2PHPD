@@ -259,9 +259,6 @@ class SportMatchController extends AbstractController
             throw new HttpException(Response::HTTP_FORBIDDEN, "You are not authorized to update scores for this match");
         }
 
-
-
-
         if ($sportMatch->getScorePlayer1() !== null && $sportMatch->getScorePlayer2() !== null) {
             $sportMatch->setStatus('Finished');
         }

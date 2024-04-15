@@ -131,11 +131,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->getUserIdentifier();
     }
 
+
     public function setUsername(string $username): static
     {
         $this->username = $username;
 
         return $this;
+    }
+
+    public function getPseudo(): string
+    {
+        return $this->username;
     }
 
     /**
@@ -195,5 +201,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'firstName' => $this->getFirstName(),
+            'lastName' => $this->getLastName(),
+            'emailAddress' => $this->getEmailAddress(),
+            'username' => $this->getPseudo(),
+            'status' => $this->getStatus(),
+            'roles' => $this->getRoles(),
+        ];
     }
 }
