@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Registration;
 use App\Entity\SportMatch;
 use App\Entity\Tournament;
-use App\Entity\User;
+use App\Manager\WebsocketManager;
 use App\Repository\TournamentRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,13 +15,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use WebSocket\BadOpcodeException;
 
 #[Route('/api/')]
 class TournamentController extends AbstractController
 {
+    // initialisation du websocketManager
+    private $websocketManager;
+
+    public function __construct(WebsocketManager $websocketManager)
+    {
+        $this->websocketManager = $websocketManager;
+    }
+
     /**
      * @param Request $request
      * @param SerializerInterface $serializer // SerializerInterface object
@@ -84,7 +92,6 @@ class TournamentController extends AbstractController
     }
 
     /**
-     * @param Tournament $tournament // Tournament object
      * @param SerializerInterface $serializer // SerializerInterface object
      * @return JsonResponse // JsonResponse object
      */
@@ -109,15 +116,14 @@ class TournamentController extends AbstractController
 
     /**
      * @param Request $request // Request object
-     * @param Tournament $tournament // Tournament object
      * @param SerializerInterface $serializer // SerializerInterface object
      * @param ValidatorInterface $validator // ValidatorInterface object
      * @param EntityManagerInterface $em // EntityManagerInterface object
      * @return JsonResponse // JsonResponse object
+     * @throws BadOpcodeException
      */
     #[Route('tournaments/{id}', name: 'updateTournament', methods: ['PUT'])]
-    public function updateTournament(Request $request, int $id, SerializerInterface $serializer,
-                                     ValidatorInterface $validator, EntityManagerInterface $em, UserRepository $userRepository): JsonResponse
+    public function updateTournament(Request $request, int $id, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, UserRepository $userRepository): JsonResponse
     {
         $tournament = $em->getRepository(Tournament::class)->find($id);
         if(!$tournament) {
@@ -130,12 +136,45 @@ class TournamentController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
+        $context = ['object_to_populate' => $tournament, 'ignored_attributes' => ['organizer', 'winner']];
+        $updatedTournament = $serializer->deserialize($request->getContent(), Tournament::class, 'json', $context);
         if (isset($data['winner'])) {
             $winner = $userRepository->find($data['winner']);
             if (!$winner) {
                 throw new HttpException(Response::HTTP_BAD_REQUEST, "Invalid winner ID");
             }
+            $registrations = $em->getRepository(Registration::class)->findBy(['tournament' => $tournament]);
+            $isParticipant = false;
+            foreach ($registrations as $registration) {
+                if ($registration->getPlayer()->getId() === $winner->getId()) {
+                    $isParticipant = true;
+                    break;
+                }
+            }
+            if (!$isParticipant) {
+                throw new HttpException(Response::HTTP_BAD_REQUEST, "The winner must be a participant of the tournament");
+            }
             $tournament->setWinner($winner);
+
+            $this->websocketManager->sendMessageToRoom($winner->getId(), "Congratulation 🎉 You won the tournament ".$tournament->getTournamentName());
+
+            $registrations = $em->getRepository(Registration::class)->findBy([
+                'tournament' => $tournament,
+                'status' => 'registered'
+            ]);
+
+            foreach ($registrations as $registration) {
+                if ($registration->getPlayer()->getId() === $winner->getId()) {
+                    continue;
+                }
+
+                $this->websocketManager->sendMessageToRoom(
+                    $registration->getPlayer()->getId(),
+                    "The tournament ".$tournament->getTournamentName()." has ended. The winner is ".$winner->getFirstName()." ".$winner->getLastName()
+                );
+            }
+
+
         }
 
         if (isset($data['organizer'])) {
@@ -146,17 +185,13 @@ class TournamentController extends AbstractController
             $tournament->setOrganizer($organizer);
         }
 
-        $updatedTournament = $serializer->deserialize($request->getContent(), Tournament::class, 'json', ['object_to_populate' => $tournament]);
-
-
-        $error = $validator->validate($tournament);
+        $error = $validator->validate($updatedTournament);
         if (count($error) > 0) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, $error[0]->getMessage());
         }
 
         $em->persist($updatedTournament);
         $em->flush();
-
         $response = [
             'message' => 'Tournament updated successfully',
             'status' => Response::HTTP_OK,
@@ -164,6 +199,8 @@ class TournamentController extends AbstractController
 
         return new JsonResponse($response, Response::HTTP_OK);
     }
+
+
 
     /**
      * @param EntityManagerInterface $em // EntityManagerInterface object
