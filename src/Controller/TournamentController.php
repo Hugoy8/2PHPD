@@ -22,7 +22,6 @@ use WebSocket\BadOpcodeException;
 #[Route('/api/')]
 class TournamentController extends AbstractController
 {
-    // initialisation du websocketManager
     private $websocketManager;
 
     public function __construct(WebsocketManager $websocketManager)
