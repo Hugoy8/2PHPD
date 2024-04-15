@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Registration;
+use App\Entity\SportMatch;
+use App\Entity\Tournament;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -74,11 +76,19 @@ class UserController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players', name: 'allPlayers', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN', message: "Only admins can access this route")]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
         $userList = $userRepository->findAll();
         $jsonUserList = $serializer->serialize($userList, 'json', ['groups' => 'getPlayers']);
+
+        if (count($userList) === 0) {
+            $response = [
+                'message' => 'No users found',
+                'status' => Response::HTTP_OK
+            ];
+            return new JsonResponse($response, Response::HTTP_OK);
+        }
+
         $response = [
             'message' => 'List of all users',
             'number_of_users' => count($userList),
@@ -90,13 +100,17 @@ class UserController extends AbstractController
     }
 
     /**
-     * @param User $user // User object
      * @param SerializerInterface $serializer // SerializerInterface object
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players/{id}', name: 'playerById', methods: ['GET'])]
-    public function getUserById(User $user, SerializerInterface $serializer): JsonResponse
+    public function getUserById(int $id,  SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
+        $user = $em->getRepository(User::class)->find($id);
+        if(!$user) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "Player not found");
+        }
+
         $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getPlayers']);
 
         $response = [
@@ -109,7 +123,6 @@ class UserController extends AbstractController
 
     /**
      * @param Request $request // Request object
-     * @param User $user // User object
      * @param SerializerInterface $serializer // SerializerInterface object
      * @param ValidatorInterface $validator // ValidatorInterface object
      * @param UserPasswordHasherInterface $passwordHasher // UserPasswordHasherInterface object
@@ -117,9 +130,14 @@ class UserController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players/{id}', name: 'updatePlayer', methods: ['PUT'])]
-    public function updateUser(Request $request, User $user, SerializerInterface $serializer, ValidatorInterface $validator,
+    public function updateUser(int $id, Request $request, SerializerInterface $serializer, ValidatorInterface $validator,
                                UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): JsonResponse
     {
+        $user = $em->getRepository(User::class)->find($id);
+        if(!$user) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "Player not found");
+        }
+
         $currentUser = $this->getUser();
         if ($currentUser->getId() !== $user->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
             throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot update another user");
@@ -147,16 +165,43 @@ class UserController extends AbstractController
     }
 
     /**
-     * @param User $user // User object
      * @param EntityManagerInterface $em // EntityManagerInterface object
      * @return JsonResponse // JsonResponse object
      */
     #[Route('players/{id}', name: 'deletePlayer', methods: ['DELETE'])]
-    public function deleteUser(User $user, EntityManagerInterface $em): JsonResponse
+    public function deleteUser(int $id, EntityManagerInterface $em): JsonResponse
     {
+        $user = $em->getRepository(User::class)->find($id);
+        if(!$user) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "Player not found");
+        }
+
         $currentUser = $this->getUser();
         if ($currentUser->getId() !== $user->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
             throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot delete another user");
+        }
+
+        $sportMatches = $em->getRepository(SportMatch::class)->findBy(['player1' => $user]);
+        $sportMatches = array_merge($sportMatches, $em->getRepository(SportMatch::class)->findBy(['player2' => $user]));
+
+        foreach ($sportMatches as $sportMatch) {
+            $em->remove($sportMatch);
+        }
+
+        $registrations = $em->getRepository(Registration::class)->findBy(['player' => $user]);
+
+        foreach ($registrations as $registration) {
+            $em->remove($registration);
+        }
+
+        $tournaments = $em->getRepository(Tournament::class)->findBy(['organizer' => $user]);
+
+        foreach ($tournaments as $tournament) {
+            $tournamentRegistrations = $em->getRepository(Registration::class)->findBy(['tournament' => $tournament]);
+            foreach ($tournamentRegistrations as $registration) {
+                $em->remove($registration);
+            }
+            $em->remove($tournament);
         }
 
         $em->remove($user);

@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Registration;
+use App\Entity\SportMatch;
 use App\Entity\Tournament;
 use App\Entity\User;
 use App\Repository\TournamentRepository;
@@ -87,8 +89,13 @@ class TournamentController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('tournaments/{id}', name: 'tournamentById', methods: ['GET'])]
-    public function getTournamentById(Tournament $tournament, SerializerInterface $serializer): JsonResponse
+    public function getTournamentById(int $id, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
+        $tournament = $em->getRepository(Tournament::class)->find($id);
+        if(!$tournament) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "Tournament not found");
+        }
+
         $jsonTournament = $serializer->serialize($tournament, 'json', ['groups' => 'getTournaments']);
 
         $response = [
@@ -109,9 +116,14 @@ class TournamentController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('tournaments/{id}', name: 'updateTournament', methods: ['PUT'])]
-    public function updateTournament(Request $request, Tournament $tournament, SerializerInterface $serializer,
+    public function updateTournament(Request $request, int $id, SerializerInterface $serializer,
                                      ValidatorInterface $validator, EntityManagerInterface $em, UserRepository $userRepository): JsonResponse
     {
+        $tournament = $em->getRepository(Tournament::class)->find($id);
+        if(!$tournament) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "Tournament not found");
+        }
+
         $currentUser = $this->getUser();
         if ($currentUser->getId() !== $tournament->getOrganizer()->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
             throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot update a tournament you did not create");
@@ -126,8 +138,6 @@ class TournamentController extends AbstractController
             $tournament->setWinner($winner);
         }
 
-        $serializer->deserialize($request->getContent(), Tournament::class, 'json', ['object_to_populate' => $tournament, 'ignored_attributes' => ['winner', 'organizer']]);
-
         if (isset($data['organizer'])) {
             $organizer = $userRepository->find($data['organizer']);
             if (!$organizer) {
@@ -136,12 +146,15 @@ class TournamentController extends AbstractController
             $tournament->setOrganizer($organizer);
         }
 
+        $updatedTournament = $serializer->deserialize($request->getContent(), Tournament::class, 'json', ['object_to_populate' => $tournament]);
+
+
         $error = $validator->validate($tournament);
         if (count($error) > 0) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, $error[0]->getMessage());
         }
 
-        $em->persist($tournament);
+        $em->persist($updatedTournament);
         $em->flush();
 
         $response = [
@@ -153,16 +166,31 @@ class TournamentController extends AbstractController
     }
 
     /**
-     * @param Tournament $tournament // Tournament object
      * @param EntityManagerInterface $em // EntityManagerInterface object
      * @return JsonResponse // JsonResponse object
      */
     #[Route('tournaments/{id}', name: 'deleteTournament', methods: ['DELETE'])]
-    public function deleteTournament(Tournament $tournament, EntityManagerInterface $em): JsonResponse
+    public function deleteTournament(int $id, EntityManagerInterface $em): JsonResponse
     {
+        $tournament = $em->getRepository(Tournament::class)->find($id);
+        if(!$tournament) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "Tournament not found");
+        }
         $currentUser = $this->getUser();
         if ($currentUser->getId() !== $tournament->getOrganizer()->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
             throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot delete a tournament you did not create");
+        }
+
+        $sportMatches = $em->getRepository(SportMatch::class)->findBy(['tournament' => $tournament]);
+
+        foreach ($sportMatches as $sportMatch) {
+            $em->remove($sportMatch);
+        }
+
+        $registrations = $em->getRepository(Registration::class)->findBy(['tournament' => $tournament]);
+
+        foreach ($registrations as $registration) {
+            $em->remove($registration);
         }
 
         $em->remove($tournament);
@@ -175,5 +203,4 @@ class TournamentController extends AbstractController
 
         return new JsonResponse($response, Response::HTTP_OK);
     }
-
 }

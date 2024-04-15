@@ -64,24 +64,25 @@ class RegistrationController extends AbstractController
      * @return JsonResponse
      */
     #[Route('{id}/registrations', name: 'createRegistrationForTournament', methods: ['POST'])]
-    public function createRegistrationForTournament(int $id, Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em): JsonResponse
+    public function createRegistrationForTournament(int $id, Request $request, SerializerInterface $serializer,
+                                                    ValidatorInterface $validator, EntityManagerInterface $em): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $userId = $data['player'];
         $currentUser = $this->getUser();
 
-        if ($currentUser->getId() !== $userId && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
+        $tournament = $em->getRepository(Tournament::class)->find($id);
+        if (!$tournament) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Tournament not found');
+        }
+
+        if ($currentUser->getId() !== $userId && !in_array('ROLE_ADMIN', $currentUser->getRoles()) && $currentUser->getId() !== $tournament->getOrganizer()->getId()){
             throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot create a registration for another player");
         }
 
         $user = $em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw new HttpException(Response::HTTP_NOT_FOUND, 'User not found');
-        }
-
-        $tournament = $em->getRepository(Tournament::class)->find($id);
-        if (!$tournament) {
-            throw new HttpException(Response::HTTP_NOT_FOUND, 'Tournament not found');
         }
 
         // Check if the tournament is already closed
