@@ -144,4 +144,19 @@ class SportMatch
 
         return $this;
     }
+
+    public function getWinner(): ?User
+    {
+        if ($this->getStatus() !== 'Finished') {
+            return null;
+        }
+
+        if ($this->getScorePlayer1() > $this->getScorePlayer2()) {
+            return $this->getPlayer1();
+        } else if ($this->getScorePlayer1() < $this->getScorePlayer2()) {
+            return $this->getPlayer2();
+        } else {
+            return null;
+        }
+    }
 }

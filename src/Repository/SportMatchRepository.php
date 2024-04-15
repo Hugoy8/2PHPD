@@ -21,6 +21,20 @@ class SportMatchRepository extends ServiceEntityRepository
         parent::__construct($registry, SportMatch::class);
     }
 
+    public function findByPlayer(int $idPlayer, ?int $idTournament = null)
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.player1 = :idPlayer OR m.player2 = :idPlayer')
+            ->setParameter('idPlayer', $idPlayer);
+
+        if ($idTournament !== null) {
+            $qb->andWhere('m.tournament = :idTournament')
+                ->setParameter('idTournament', $idTournament);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return SportMatch[] Returns an array of SportMatch objects
 //     */
