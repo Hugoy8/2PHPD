@@ -6,6 +6,7 @@ use App\Entity\Registration;
 use App\Entity\SportMatch;
 use App\Entity\Tournament;
 use App\Entity\User;
+use App\Manager\WebsocketManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,10 +16,18 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use WebSocket\BadOpcodeException;
 
 #[Route('/api/tournaments/')]
 class SportMatchController extends AbstractController
 {
+    private $websocketManager;
+
+    public function __construct(WebsocketManager $websocketManager)
+    {
+        $this->websocketManager = $websocketManager;
+    }
+
     /**
      * @param int $id
      * @param SerializerInterface $serializer
@@ -177,6 +186,7 @@ class SportMatchController extends AbstractController
      * @param EntityManagerInterface $em
      * @param ValidatorInterface $validator
      * @return JsonResponse
+     * @throws BadOpcodeException
      */
     #[Route('{idTournament}/sport-matchs/{idSportMatchs}', name: 'updateSportMatchFromTournament', methods: ['PUT'])]
     public function updateSportMatchFromTournament($idTournament, $idSportMatchs, Request $request, SerializerInterface $serializer,
@@ -205,9 +215,6 @@ class SportMatchController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
-
-
-        $currentUser = $this->getUser();
         if (in_array('ROLE_ADMIN', $currentUser->getRoles()) || $currentUser->getId() === $tournament->getOrganizer()->getId()) {
             if (isset($data['scorePlayer1'])) {
                 $sportMatch->setScorePlayer1($data['scorePlayer1']);
@@ -231,18 +238,28 @@ class SportMatchController extends AbstractController
         } elseif ($currentUser->getId() === $sportMatch->getPlayer1()->getId()) {
             if (isset($data['scorePlayer1']) && !isset($data['scorePlayer2'])) {
                 $sportMatch->setScorePlayer1($data['scorePlayer1']);
+                if ($sportMatch->getScorePlayer2() === null)
+                    $messagePlayer2 = 'Your opponent has updated his score in the tournament ' . $tournament->getTournamentName() . ', please update your score';
+                    $this->websocketManager->sendMessageToRoom($sportMatch->getPlayer2()->getId(), $messagePlayer2);
+
             } else {
                 throw new HttpException(Response::HTTP_FORBIDDEN, "You are not allowed to update the other player's score");
             }
         } elseif ($currentUser->getId() === $sportMatch->getPlayer2()->getId()) {
             if (isset($data['scorePlayer2']) && !isset($data['scorePlayer1'])) {
                 $sportMatch->setScorePlayer2($data['scorePlayer2']);
+                if ($sportMatch->getScorePlayer1() === null) {
+                    $messagePlayer1 = 'Your opponent has updated his score in the tournament ' . $tournament->getTournamentName() . ', please update your score';
+                    $this->websocketManager->sendMessageToRoom($sportMatch->getPlayer1()->getId(), $messagePlayer1);
+                }
             } else {
                 throw new HttpException(Response::HTTP_FORBIDDEN, "You are not allowed to update the other player's score");
             }
         } else {
             throw new HttpException(Response::HTTP_FORBIDDEN, "You are not authorized to update scores for this match");
         }
+
+
 
 
         if ($sportMatch->getScorePlayer1() !== null && $sportMatch->getScorePlayer2() !== null) {

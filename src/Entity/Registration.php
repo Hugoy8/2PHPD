@@ -40,6 +40,7 @@ class Registration
     #[Assert\Length(min: 1, max: 255, minMessage: 'The status must be at least 1 character long', maxMessage: 'The status must be at most 255 characters long')]
     private ?string $status = null;
 
+
     public function getId(): ?int
     {
         return $this->id;
