@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Registration;
+use App\Entity\SportMatch;
 use App\Entity\Tournament;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -36,7 +37,7 @@ class AppFixtures extends Fixture
         $user2->setFirstName('Adrien');
         $user2->setLastName('Czesnalowicz');
         $user2->setEmailAddress('user2@bookapi.com');
-        $user2->setUsername('Hugoy');
+        $user2->setUsername('Hugoy_');
         $user2->setRoles(['ROLE_USER']);
         $user2->setPassword($this->userPasswordHasher->hashPassword($user2, 'password'));
         $user2->setStatus('active');
@@ -90,6 +91,37 @@ class AppFixtures extends Fixture
         $registration2->setRegistrationDate(new \DateTime('2023-06-06'));
         $registration2->setStatus('registered');
         $manager->persist($registration2);
+
+        // Création de matchs
+        $match1 = new SportMatch();
+        $match1->setTournament($tournament1);
+        $match1->setPlayer1($user);
+        $match1->setPlayer2($user2);
+        $match1->setMatchDate(new \DateTime('2022-01-01'));
+        $match1->setScorePlayer1(2);
+        $match1->setScorePlayer2(1);
+        $match1->setStatus('finished');
+        $manager->persist($match1);
+
+        $match2 = new SportMatch();
+        $match2->setTournament($tournament2);
+        $match2->setPlayer1($user2);
+        $match2->setPlayer2($user);
+        $match2->setMatchDate(new \DateTime('2024-06-06'));
+        $match2->setScorePlayer1(1);
+        $match2->setScorePlayer2(2);
+        $match2->setStatus('on going');
+        $manager->persist($match2);
+
+        $match3 = new SportMatch();
+        $match3->setTournament($tournament1);
+        $match3->setPlayer1($user);
+        $match3->setPlayer2($user2);
+        $match3->setMatchDate(new \DateTime('2022-01-01'));
+        $match3->setScorePlayer1(2);
+        $match3->setScorePlayer2(1);
+        $match3->setStatus('finished');
+        $manager->persist($match3);
 
         $manager->flush();
     }
