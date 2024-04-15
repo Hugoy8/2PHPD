@@ -248,7 +248,8 @@ class SportMatchController extends AbstractController
         if ($sportMatch->getScorePlayer1() !== null && $sportMatch->getScorePlayer2() !== null) {
             $sportMatch->setStatus('Finished');
         }
-        elseif ($sportMatch->getMatchDate() === new \DateTime('now')) {
+
+        elseif ($sportMatch->getMatchDate() === new \DateTime('now') || $sportMatch->getScorePlayer1() !== null || $sportMatch->getScorePlayer2() !== null) {
             $sportMatch->setStatus('Ongoing');
         }
         elseif ($sportMatch->getMatchDate() < new \DateTime('now')) {
