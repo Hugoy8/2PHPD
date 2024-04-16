@@ -9,7 +9,41 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\Schema(
+ *     schema="User",
+ *     required={"firstName", "lastName", "username", "emailAddress", "password"},
+ *     @OA\Property(
+ *         property="firstName",
+ *         type="string",
+ *         description="The first name of the user"
+ *     ),
+ *     @OA\Property(
+ *         property="lastName",
+ *         type="string",
+ *         description="The last name of the user"
+ *     ),
+ *     @OA\Property(
+ *         property="username",
+ *         type="string",
+ *         description="The username of the user"
+ *     ),
+ *     @OA\Property(
+ *         property="emailAddress",
+ *         type="string",
+ *         description="The email address of the user"
+ *     ),
+ *     @OA\Property(
+ *         property="password",
+ *         type="string",
+ *         description="The password of the user"
+ *     )
+ * )
+ */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_emailAddress_username', fields: ['emailAddress', 'username'])]
 #[UniqueEntity(fields: ['username'], message: 'Username already taken')]

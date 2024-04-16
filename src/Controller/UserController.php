@@ -17,10 +17,38 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 #[Route('/api/')]
 class UserController extends AbstractController
 {
+    /**
+     * @Route("/api/register", name="register", methods={"POST"})
+     * @OA\Post(
+     *     path="/api/register",
+     *     tags={"User"},
+     *     summary="Register a new user",
+     *     description="This endpoint allows you to register a new user.",
+     *     @OA\RequestBody(
+     *         description="User data",
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request"
+     *     )
+     * )
+     * @OA\Tag(name="User")
+     */
+
     /**
      * @param Request $request // Request object
      * @param UserPasswordHasherInterface $passwordHasher // UserPasswordHasherInterface object
