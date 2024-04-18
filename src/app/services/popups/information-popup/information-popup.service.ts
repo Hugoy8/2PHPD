@@ -48,7 +48,15 @@ export class InformationPopupService{
    */
   public displayPopup(newMessage: string, newType: "success" | "error" | "warning" | "information"): void {
     if (newMessage == "" || newMessage == null){
-      newMessage = "Aucune information à afficher. Veuillez ignorer ce message.";
+      if (newType == "success"){
+        newMessage = "Une action a été réalisé avec succès. Aucune information à afficher.";
+      } else if (newType == "error"){
+        newMessage = "Une erreur inconnue est survenue. Veuillez réssayer plus tard !";
+      } else if (newType == "warning"){
+        newMessage = "Une action a été réalisé avec des erreurs. Veuillez vérifier les informations / actions saisies.";
+      } else {
+        newMessage = "Aucune information à afficher. Veuillez ignorer ce message.";
+      }
     }
 
     this.message = newMessage;
