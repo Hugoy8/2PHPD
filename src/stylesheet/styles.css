@@ -1,0 +1,90 @@
+/* Importation CSS */
+@import '../../src/stylesheet/root.css';
+@import '../../src/stylesheet/animation.css';
+@import '../../src/stylesheet/base.css';
+@import '../../src/stylesheet/fonts.css';
+@import '../../src/stylesheet/svg.css';
+@import '../../src/stylesheet/buttons.css';
+
+/* Element inputs en entier (Label et input) */
+.inputElement{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+.inputElement > .labelZone{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.inputElement > .labelZone > label{
+  color: var(--secondaryColor);
+  font-size: 16px;
+  font-weight: 500;
+}
+.inputElement > .labelZone > a{
+  color: var(--accentColor_500);
+  font-size: 14px;
+  font-weight: 600;
+}
+.inputElement > .labelZone > a:hover{
+  color: var(--secondaryColor);
+}
+.inputElement > .inputZone{
+  width: 100%;
+  position: relative;
+  display: flex;
+}
+.inputElement > .inputZone > input{
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--borderRadiusStandard);
+  border: 1px solid #DDD;
+  background: var(--primaryColor);
+
+  color: var(--textGray);
+  font-size: 16px;
+  font-weight: 400;
+}
+.inputElement > .inputZone > .icon{
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.inputElement > .inputZone > .icon:hover path{
+  fill: var(--secondaryColor);
+}
+.errorActived > .errorMessage{
+  opacity: 1 !important;
+  user-select: auto !important;
+  display: flex !important;
+}
+.errorActived > .inputZone > input{
+  border: 1px solid var(--errorColor) !important;
+}
+.inputElement > .errorMessage{
+  display: none;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  opacity: 0;
+  user-select: none;
+  transition: opacity 0.2s ease-in-out;
+}
+.inputElement > .errorMessage > span{
+  color: var(--errorColor);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  width: calc(100% - 24px);
+}

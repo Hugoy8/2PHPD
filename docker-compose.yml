@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  scorelt-front:
+    container_name: scorelt-front
+    image: "ghcr.io/hugoy8/scorelt-front:TAG_PLACEHOLDER"
+    ports:
+      - "4200:80"
+    restart: on-failure

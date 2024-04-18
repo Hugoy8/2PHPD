@@ -1,0 +1,24 @@
+/* Bouton principale en couleur accent */
+.primaryButtonAccent{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  border-radius: var(--borderRadiusStandard);
+  background: var(--accentColor_500);
+
+  color: var(--primaryColor);
+  font-size: 18px;
+  font-weight: 600;
+}
+.primaryButtonAccent:disabled{
+  user-select: none !important;
+  pointer-events: none !important;
+  background: rgba(83, 152, 255, 0.6);
+}
+.primaryButtonAccent:hover{
+  box-shadow: 0px 0px 0px 5px rgba(83, 152, 255, 0.11);
+}
