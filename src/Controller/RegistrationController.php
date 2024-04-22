@@ -27,9 +27,13 @@ class RegistrationController extends AbstractController
      * @return JsonResponse
      */
     #[Route('{id}/registrations', name: 'allRegistrationsForTournament', methods: ['GET'])]
-    public function getAllRegistrationsForTournament(int $id, RegistrationRepository $registrationRepository, Tournament $tournament,
-                                                     SerializerInterface $serializer): JsonResponse
+    public function getAllRegistrationsForTournament(int $id, RegistrationRepository $registrationRepository,
+                                                     SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
     {
+        $tournament = $em->getRepository(Tournament::class)->find($id);
+        if(!$tournament) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "Tournament not found");
+        }
 
         $jsonTournament = $serializer->serialize($tournament, 'json', ['groups' => 'getTournaments']);
 

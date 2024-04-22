@@ -75,6 +75,11 @@ class TournamentController extends AbstractController
     {
 
         $tournamentList = $tournamentRepository->findAll();
+
+        if (!$tournamentList) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, "No tournament found");
+        }
+
         $tournaments = [];
 
         foreach ($tournamentList as $tournament) {
@@ -114,12 +119,22 @@ class TournamentController extends AbstractController
             throw new HttpException(Response::HTTP_NOT_FOUND, "Tournament not found");
         }
 
-        $jsonTournament = $serializer->serialize($tournament, 'json', ['groups' => 'getTournaments']);
+        $currentUser = $this->getUser();
+        $numberOfParticipants = count($em->getRepository(Registration::class)->findBy(['tournament' => $tournament]));
+        $registration = $em->getRepository(Registration::class)->findOneBy(['tournament' => $tournament, 'player' => $currentUser]);
+        $isUserRegistered = $registration?->getStatus();
+        if (!$isUserRegistered) {
+            $isUserRegistered = 'not registered';
+        }
+
+        $tournamentData = $serializer->normalize($tournament, null, ['groups' => 'getTournaments']);
+        $tournamentData['numberOfParticipants'] = $numberOfParticipants;
+        $tournamentData['isUserRegistered'] = $isUserRegistered;
 
         $response = [
             'message' => 'Tournament found',
             'status' => Response::HTTP_OK,
-            'tournament' => json_decode($jsonTournament, true)
+            'tournament' => $tournamentData
         ];
 
         return new JsonResponse($response, Response::HTTP_OK);

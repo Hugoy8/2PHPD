@@ -88,9 +88,9 @@ class UserController extends AbstractController
         if (count($userList) === 0) {
             $response = [
                 'message' => 'No users found',
-                'status' => Response::HTTP_OK
+                'status' => Response::HTTP_NOT_FOUND
             ];
-            return new JsonResponse($response, Response::HTTP_OK);
+            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
         }
 
         $response = [
@@ -138,23 +138,40 @@ class UserController extends AbstractController
                                UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): JsonResponse
     {
         $user = $em->getRepository(User::class)->find($id);
-        if(!$user) {
+        if (!$user) {
             throw new HttpException(Response::HTTP_NOT_FOUND, "Player not found");
         }
 
         $currentUser = $this->getUser();
-        if ($currentUser->getId() !== $user->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
-            throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot update another user");
+        if ($currentUser->getId() !== $user->getId()) {
+            if (!in_array('ROLE_ADMIN', $currentUser->getRoles())) {
+                throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot update another user");
+            }
+            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+                throw new HttpException(Response::HTTP_FORBIDDEN, "Admins cannot be modified by other admins");
+            }
         }
 
-        $updatedUser = $serializer->deserialize($request->getContent(), User::class, 'json', ['object_to_populate' => $user]);
+        $content = $request->getContent();
+        $updatedUser = $serializer->deserialize($content, User::class, 'json', ['object_to_populate' => $user]);
 
-        $errors = $validator->validate($user);
+        if ($currentUser->getId() === $user->getId()) {
+            $contentData = json_decode($content, true);
+            if (isset($contentData['roles']) && $contentData['roles'] !== $user->getRoles()) {
+                throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot change your own role");
+            }
+
+            if (isset($contentData['status']) && $contentData['status'] !== $user->getStatus()) {
+                throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot change your own status");
+            }
+        }
+
+        $errors = $validator->validate($updatedUser);
         if (count($errors) > 0) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, $errors[0]->getMessage());
         }
 
-        if ($updatedUser->getPassword()) {
+        if (!empty($updatedUser->getPassword())) {
             $updatedUser->setPassword($passwordHasher->hashPassword($updatedUser, $updatedUser->getPassword()));
         }
 
@@ -183,6 +200,10 @@ class UserController extends AbstractController
         $currentUser = $this->getUser();
         if ($currentUser->getId() !== $user->getId() && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
             throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot delete another user");
+        }
+
+        if (in_array('ROLE_ADMIN', $currentUser->getRoles()) && in_array('ROLE_ADMIN', $user->getRoles())) {
+            throw new HttpException(Response::HTTP_FORBIDDEN, "Admin cannot delete another admin");
         }
 
         $sportMatches = $em->getRepository(SportMatch::class)->findBy(['player1' => $user]);
