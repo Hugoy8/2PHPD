@@ -25,37 +25,13 @@ use OpenApi\Annotations as OA;
 class UserController extends AbstractController
 {
     /**
-     * @Route("/api/register", name="register", methods={"POST"})
-     * @OA\Post(
-     *     path="/api/register",
-     *     tags={"User"},
-     *     summary="Register a new user",
-     *     description="This endpoint allows you to register a new user.",
-     *     @OA\RequestBody(
-     *         description="User data",
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/User")
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="User created successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/User")
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request"
-     *     )
-     * )
-     * @OA\Tag(name="User")
-     */
-
-    /**
-     * @param Request $request // Request object
-     * @param UserPasswordHasherInterface $passwordHasher // UserPasswordHasherInterface object
-     * @param SerializerInterface $serializer // SerializerInterface object
-     * @param ValidatorInterface $validator // ValidatorInterface object
-     * @param EntityManagerInterface $em // EntityManagerInterface object
-     * @return JsonResponse // JsonResponse object
+     *  @OA\Response(
+     *      response=200,
+     *      @Model(type=User::class, groups={"getPlayers"})
+     *  )
+     *
+     * @OA\Tag(name="rewards")
+     * @Security(name="Bearer")
      */
     #[Route('register', name: 'register', methods: ['POST'])]
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher, SerializerInterface $serializer,
@@ -225,10 +201,16 @@ class UserController extends AbstractController
         $tournaments = $em->getRepository(Tournament::class)->findBy(['organizer' => $user]);
 
         foreach ($tournaments as $tournament) {
+            $tournamentSportMatches = $em->getRepository(SportMatch::class)->findBy(['tournament' => $tournament]);
+            foreach ($tournamentSportMatches as $sportMatch) {
+                $em->remove($sportMatch);
+            }
+
             $tournamentRegistrations = $em->getRepository(Registration::class)->findBy(['tournament' => $tournament]);
             foreach ($tournamentRegistrations as $registration) {
                 $em->remove($registration);
             }
+
             $em->remove($tournament);
         }
 

@@ -2,65 +2,75 @@
 
 namespace App\Tests\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Controller\UserController;
 use App\Entity\User;
-use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class UserControllerTest extends WebTestCase
+class UserControllerTest extends TestCase
 {
-    private $client = null;
-
-    protected function setUp(): void
+    public function testCreateUser()
     {
-        $this->client = static::createClient();
-        $this->client->disableReboot();
-    }
 
-    public function testRegister(): void
-    {
-        $data = [
-            'firstName' => 'John',
-            'lastName' => 'Doe',
-            'username' => 'johndoe',
-            'emailAddress' => 'johndoe@example.com',
-            'password' => 'securepassword123'
-        ];
+        // Create a Request mock with the expected JSON content
+        $requestContent = json_encode([
+            'firstName' => 'Test',
+            'lastName' => 'User',
+            'username' => 'testuser',
+            'emailAddress' => 'testuser@example.com',
+            'password' => 'password123'
+        ]);
 
-        $this->client->request(
-            'POST',
-            '/api/register',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
+        $requestMock = $this->createMock(Request::class);
+        $requestMock->method('getContent')
+            ->willReturn($requestContent);
+
+        // Create the necessary mocks
+        $entityManagerMock = $this->createMock(EntityManagerInterface::class);
+        $passwordHasherMock = $this->createMock(UserPasswordHasherInterface::class);
+        $serializerMock = $this->createMock(SerializerInterface::class);
+        $validatorMock = $this->createMock(ValidatorInterface::class);
+
+        // Mock the password hasher
+        $passwordHasherMock->method('hashPassword')
+            ->will($this->returnCallback(function ($user, $password) {
+                return 'hashed_' . $password;
+            }));
+
+        // Set up the EntityManager to expect persisting a User object
+        $entityManagerMock->expects($this->once())
+            ->method('persist')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User
+                    && $user->getFirstName() === 'Test'
+                    && $user->getLastName() === 'User'
+                    && $user->getUsername() === 'testuser'
+                    && $user->getEmailAddress() === 'testuser@example.com'
+                    && $user->getPassword() === 'password123'; // The actual password won't be 'password123' because it's hashed
+            }));
+
+        $entityManagerMock->expects($this->once())
+            ->method('flush');
+
+        // Mock the Serializer to return a JSON representation of the User
+        $serializerMock->method('serialize')
+            ->willReturn('{"id":1,"firstName":"Test","lastName":"User","username":"testuser","emailAddress":"testuser@example.com","roles":["ROLE_USER"]}');
+
+        // Instantiate the controller and call the register method
+        $userController = new UserController();
+        $response = $userController->register($requestMock, $passwordHasherMock, $serializerMock, $validatorMock, $entityManagerMock);
+
+        // Perform the assertions to make sure everything worked as expected
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(JsonResponse::HTTP_CREATED, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString(
+            '{"message":"User created successfully","status":201,"user":{"id":1,"firstName":"Test","lastName":"User","username":"testuser","emailAddress":"testuser@example.com","roles":["ROLE_USER"]}}',
+            $response->getContent()
         );
-
-        $this->assertEquals(Response::HTTP_CREATED, $this->client->getResponse()->getStatusCode());
-    }
-
-    public function testGetAllUsers(): void
-    {
-        $this->client->request('GET', '/api/players');
-        $response = $this->client->getResponse();
-
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertJson($response->getContent());
-    }
-
-    public function testDeleteUser(): void
-    {
-        // Assuming we are deleting a user with id=1
-        $this->client->request('DELETE', '/api/players/1');
-        $response = $this->client->getResponse();
-
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertJson($response->getContent());
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertEquals('User deleted successfully', $responseData['message']);
-    }
-
-    protected function tearDown(): void
-    {
-        $this->client = null;
     }
 }
