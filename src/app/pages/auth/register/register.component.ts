@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {RouterLink} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {LowercaseDirective} from "../../../directives/lowercase-directive";
 import {CustomValidators} from "../../../validators/custom-validators";
@@ -10,6 +10,7 @@ import {catchError, map, of, tap} from "rxjs";
 import {successRegister} from "../../../models/auth/register.model";
 import {UserService} from "../../../services/user/user.service";
 import {InformationPopupService} from "../../../services/popups/information-popup/information-popup.service";
+import {CookieService} from "../../../services/cookie/cookie.service";
 
 @Component({
   selector: 'app-register',
@@ -45,11 +46,17 @@ export class RegisterComponent implements OnInit{
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly userService: UserService,
-    private readonly informationPopupService: InformationPopupService
+    private readonly informationPopupService: InformationPopupService,
+    private readonly router: Router,
+    private readonly cookieService: CookieService
   ) {}
 
   public ngOnInit(): void {
     this.initForm();
+
+    if (this.cookieService.checkCookie('session') && this.cookieService.getCookie('session') != ''){
+      this.router.navigateByUrl('/dashboard');
+    }
   }
 
   /**
@@ -107,6 +114,7 @@ export class RegisterComponent implements OnInit{
       map((successRegister: successRegister): void => {
         this.userService.setUserInformation(successRegister.user);
         this.informationPopupService.displayPopup('Votre inscription a été effectué avec succès.', 'success');
+        this.router.navigateByUrl('/login');
       }),
       tap(():void => {
         this.isLoading = false;

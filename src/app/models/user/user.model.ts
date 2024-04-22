@@ -15,3 +15,11 @@ export interface UserInformation {
   message: string,
   user: User
 }
+
+/* Le model pour les différentes informations à modifier */
+export interface UpdateUser {
+  firstName?: string,
+  lastName?: string,
+  username?: string,
+  emailAddress?: string
+}

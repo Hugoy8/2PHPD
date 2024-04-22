@@ -1,0 +1,175 @@
+@import '../../../stylesheet/popup.css';
+
+/* Les popups */
+.popup{
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Le container principale du composant */
+.container{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 40px;
+}
+.container > .top{
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.container > .bottom{
+  width: 100%;
+  height: auto;
+  display: flex;
+  overflow: hidden;
+}
+.bottom.empty{
+  height: 100% !important;
+}
+/* Les titres et texte */
+.container > .top > span{
+  color: var(--accentColor_500);
+  font-size: 20px;
+  font-weight: 600;
+}
+/* Le tableau */
+.containerTable::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.containerTable::-webkit-scrollbar-thumb {
+  background: none;
+  border-radius: 15px;
+}
+.containerTable::-webkit-scrollbar-thumb:hover {
+  background: none;
+}
+table {
+  width: 100%;
+  height: auto;
+}
+thead{
+  position: sticky;
+  top: -1px;
+  z-index: 1;
+}
+tbody{
+  position: relative;
+}
+thead::after{
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 1px;
+  background: #DDD;
+}
+thead > tr > th {
+  color: #000;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding-bottom: 16px;
+}
+tbody > tr td > div {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 0 0 0;
+  color: #000;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+tbody > tr td > div > span{
+  color: #707070;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+/* Les différentes status de l'action */
+tbody > tr td > .statut{
+  gap: 6px !important;
+}
+tbody > tr td > .button{
+  gap: 4px !important;
+  cursor: pointer;
+}
+tbody > tr td > .button:hover svg{
+  transform: translateX(4px);
+}
+tbody > tr td > .statut.comming > span{
+  color: var(--accentColor_500);
+  font-weight: 600 !important;
+}
+tbody > tr td > .statut.comming > svg > .stroke{
+  stroke: var(--accentColor_500);
+}
+tbody > tr td > .statut.comming > svg > .fill{
+  fill: var(--accentColor_500);
+}
+tbody > tr td > .statut.waiting > span{
+  color: var(--warningColor);
+  font-weight: 600 !important;
+}
+tbody > tr td > .statut.waiting > svg > .stroke{
+  stroke: var(--warningColor);
+}
+tbody > tr td > .statut.waiting > svg > .fill{
+  fill: var(--warningColor);
+}
+tbody > tr td > .statut.success > span{
+  color: var(--successColor);
+  font-weight: 600 !important;
+}
+tbody > tr td > .statut.success > svg > .stroke{
+  stroke: var(--successColor);
+}
+tbody > tr td > .statut.success > svg > .fill{
+  fill: var(--successColor);
+}
+/* Le titre de la ligne */
+tbody > tr td > .title{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+}
+tbody > tr td > .title > .textTitle{
+  color: var(--secondaryColor);
+  font-size: 16px;
+  font-weight: 500;
+}
+tbody > tr td > .title > .textDescription{
+  color: #2B2B2B;
+  font-size: 13px;
+  font-weight: 400;
+}
+tbody > tr td > .title > .lieu{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+}
+tbody > tr td > .title > .lieu > span{
+  color: var(--accentColor_500);
+  font-size: 13px;
+  font-weight: 500;
+}

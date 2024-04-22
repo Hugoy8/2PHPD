@@ -22,3 +22,45 @@
 .primaryButtonAccent:hover{
   box-shadow: 0px 0px 0px 5px rgba(83, 152, 255, 0.11);
 }
+
+/* Bouton rond avec uniquement une icon */
+.closeIconButton{
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: #E9E9E9;
+}
+.closeIconButton:hover{
+  background: #D9D9D9;
+}
+
+/* Bouton sans fond et uniquement du texte noir et une icon */
+.textIconButtonBlack{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: var(--secondaryColor);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 0;
+  position: relative;
+}
+.textIconButtonBlack::after{
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  background: var(--secondaryColor);
+  bottom: -5px;
+  left: 0;
+  border-radius: 100px;
+  transition: all 0.2s ease-in-out;
+}
+.textIconButtonBlack:hover::after{
+  width: 100%;
+}

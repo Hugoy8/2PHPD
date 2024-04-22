@@ -4,6 +4,9 @@ import {ApiService} from "../api/api.service";
 import {Observable} from "rxjs";
 import {successLogin} from "../../models/auth/login.model";
 import {successRegister} from "../../models/auth/register.model";
+import {CookieService} from "../cookie/cookie.service";
+import {UserService} from "../user/user.service";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +15,10 @@ export class AuthService {
 
   constructor(
     private readonly http: HttpClient,
-    private readonly apiService: ApiService
+    private readonly apiService: ApiService,
+    private readonly cookieService: CookieService,
+    private readonly userService: UserService,
+    private readonly router: Router,
   ) {}
 
   /**
@@ -27,6 +33,15 @@ export class AuthService {
         username: email,
         password: password
       });
+  }
+
+  /**
+   * Permet de se déconnecter.
+   */
+  public logout(): void {
+    this.userService.deleteUser();
+    this.cookieService.deleteAllCookies();
+    this.router.navigateByUrl('/login');
   }
 
   /**
@@ -48,5 +63,16 @@ export class AuthService {
         password: password
       }
     )
+  }
+
+  /**
+   * Permet de vérifier si l'utilisateur est connecté. Et qu'un cookie de session est présent.
+   * Effectue les redirections requis si necessaire.
+   */
+  public checkIfLoginIsValid(): void {
+    if (!this.cookieService.checkCookie('session') && this.cookieService.getCookie('session') == ''){
+      this.cookieService.deleteAllCookies();
+      this.router.navigateByUrl('/login');
+    };
   }
 }

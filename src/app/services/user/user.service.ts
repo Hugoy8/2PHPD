@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import {ApiService} from "../api/api.service";
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
-import {User, UserInformation} from "../../models/user/user.model";
+import {UpdateUser, User, UserInformation} from "../../models/user/user.model";
 import {lastValueFrom, Observable} from "rxjs";
 import {CookieService} from "../cookie/cookie.service";
-import {successRegister} from "../../models/auth/register.model";
+import {responseStandard} from "../../models/response.model";
+import {JwtService} from "../jwt/jwt.service";
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,8 @@ export class UserService {
     private readonly apiService: ApiService,
     private readonly cookieService: CookieService,
     private readonly router: Router,
-    private readonly http: HttpClient
+    private readonly http: HttpClient,
+    private readonly jwtService: JwtService
   ) {}
 
   /**
@@ -28,7 +30,7 @@ export class UserService {
     if (this._userInformation === null) {
       if (this.cookieService.checkCookie('session')) {
         try {
-          const userInformation: UserInformation = await lastValueFrom(this.getUserInformation(1));
+          const userInformation: UserInformation = await lastValueFrom(this.getUserInformation(this.jwtService.decodeToken(this.cookieService.getCookie('session')).id));
 
           if (userInformation) {
             this._userInformation = userInformation.user;
@@ -47,6 +49,14 @@ export class UserService {
     }
 
     return this._userInformation;
+  }
+
+  /**
+   * Permet de rafraichir les informations de l'utilisateur.
+   * Possible que les informations soit null.
+   */
+  public async refreshUserInformation(): Promise<void> {
+    this._userInformation = await this.user();
   }
 
   /**
@@ -70,6 +80,45 @@ export class UserService {
    */
   public getUserInformation(idUser: number): Observable<UserInformation> {
     return this.http.get<UserInformation>(this.apiService.getUrlApi + 'api/players/' + idUser);
+  }
+
+  /**
+   * Permet de savoir si l'utilisateur est un administrateur.
+   * @returns {boolean} Retourne true si l'utilisateur est un administrateur.
+   */
+  public async isAdmin(): Promise<boolean> {
+    this._userInformation = await this.user();
+    if (this._userInformation){
+      return this._userInformation?.roles[0] == 'ROLE_ADMIN';
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Permet de mettre a jour les informations de l'utilisateur
+   * @param idUser L'id de l'utilisateur
+   * @param data Les données à mettre à jour
+   */
+  public updateUser(idUser: number, data: UpdateUser): Observable<responseStandard> {
+    return this.http.put<responseStandard>(
+      this.apiService.getUrlApi + 'api/players/' + idUser,
+      data
+    )
+  }
+
+  /**
+   * Permet de mettre a jour le mot de passe de l'utilisateur
+   * @param idUser L'id de l'utilisateur
+   * @param newPassword Le nouveau mot de passe
+   */
+  public updatePasswordUser(idUser: number, newPassword: string): Observable<responseStandard> {
+    return this.http.put<responseStandard>(
+      this.apiService.getUrlApi + 'api/players/' + idUser,
+      {
+        password: newPassword
+      }
+    )
   }
 }
 

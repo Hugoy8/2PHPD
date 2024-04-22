@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {RouterLink} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {CustomValidators} from "../../../validators/custom-validators";
 import {LowercaseDirective} from "../../../directives/lowercase-directive";
@@ -41,11 +41,16 @@ export class LoginComponent implements OnInit{
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly cookieService: CookieService,
-    private readonly informationPopupService: InformationPopupService
+    private readonly informationPopupService: InformationPopupService,
+    private readonly router: Router
   ) {}
 
   public ngOnInit(): void {
     this.initForm();
+
+    if (this.cookieService.checkCookie('session') && this.cookieService.getCookie('session') != ''){
+      this.router.navigateByUrl('/dashboard');
+    }
   }
 
   /**
@@ -67,7 +72,8 @@ export class LoginComponent implements OnInit{
       .pipe(
         map((successLogin: successLogin): void => {
           this.cookieService.setCookie('session', successLogin.token, 1);
-          this.informationPopupService.displayPopup('Vous vous êtes connecté correctement. Redirection en cours ....', 'success');
+          this.informationPopupService.displayPopup('Vous vous êtes connecté correctement.', 'success');
+          this.router.navigateByUrl('/dashboard');
         }),
         tap((): void => {
           this.isLoading = false;

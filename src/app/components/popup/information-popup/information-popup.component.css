@@ -46,7 +46,7 @@
 .popup > .right > .message{
   color: var(--secondaryColor);
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.16px;
 }
 
@@ -71,7 +71,7 @@
 .warning > .left {
   background: var(--warningColor);
 }
-.warning > .top > .right{
+.warning > .right > .title{
   color: var(--warningColor);
 }
 
@@ -79,6 +79,6 @@
 .information > .left {
   background: var(--informationColor);
 }
-.information > .top > .right{
+.information > .right > .title{
   color: var(--informationColor);
 }
