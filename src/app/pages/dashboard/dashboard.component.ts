@@ -8,7 +8,7 @@ import {UserService} from "../../services/user/user.service";
 import {NgClass} from "@angular/common";
 import {TournamentService} from "../../services/tournament/tournament.service";
 import {catchError, map, of, tap} from "rxjs";
-import {User} from "../../models/user/user.model";
+import {AllUserInformation, User} from "../../models/user/user.model";
 
 @Component({
   selector: 'app-dashboard',
@@ -50,6 +50,11 @@ export class DashboardComponent implements OnInit {
   public userInformation!: User | null;
 
   /**
+   * La liste de tous les utilisateurs de l'application.
+   */
+  private allUserData: User[] = [];
+
+  /**
    * L'instance de la popup de modification des informations.
    */
   private instanceOfPopupComponent!: AddModifyUserPopupComponent;
@@ -76,6 +81,19 @@ export class DashboardComponent implements OnInit {
       .pipe(
         map((data: responseAllTournament) => {
           this.allTournamentsData = data.tournaments;
+        }),
+        tap(() => {
+
+        }),
+        catchError((error: any) => {
+          return of(error);
+        })
+      ).subscribe(() => {});
+
+    this.userService.getAllUser()
+      .pipe(
+        map((data: AllUserInformation) => {
+          this.allUserData = data.users;
         }),
         tap(() => {
 
@@ -141,6 +159,13 @@ export class DashboardComponent implements OnInit {
    */
   public getNumberOfTYourTournament(): number {
     return this.getDataOfYourTournaments().length;
+  }
+
+  /**
+   * Permet de récupérer tous les utilisateurs de l'application.
+   */
+  public getDataOfAllUsers(): User[] {
+    return this.allUserData;
   }
 
   /**

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {ApiService} from "../api/api.service";
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
-import {UpdateUser, User, UserInformation} from "../../models/user/user.model";
+import {AllUserInformation, UpdateUser, User, UserInformation} from "../../models/user/user.model";
 import {lastValueFrom, Observable} from "rxjs";
 import {CookieService} from "../cookie/cookie.service";
 import {responseStandard} from "../../models/response.model";
@@ -96,6 +96,13 @@ export class UserService {
   }
 
   /**
+   * Permet de récupérer la liste de tous les utilisateurs de l'application
+   */
+  public getAllUser(): Observable<AllUserInformation> {
+    return this.http.get<AllUserInformation>(this.apiService.getUrlApi + 'api/players');
+  }
+
+  /**
    * Permet de mettre a jour les informations de l'utilisateur
    * @param idUser L'id de l'utilisateur
    * @param data Les données à mettre à jour
@@ -119,6 +126,14 @@ export class UserService {
         password: newPassword
       }
     )
+  }
+
+  /**
+   * Permet de supprimer un utilisateur
+   * @param idUser L'id de l'utilisateur
+   */
+  public deleteUserById(idUser: number) : Observable<responseStandard> {
+    return this.http.delete<responseStandard>(this.apiService.getUrlApi + 'api/players/' + idUser);
   }
 }
 

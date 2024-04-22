@@ -30,9 +30,11 @@
   <div class="cards">
     <div class="card">
       @if (this.tabSwitch[0].status) {
-        <app-custom-table [data]="this.getDataOfAllTournaments()"></app-custom-table>
+        <app-custom-table [type]="'tournament'" [data]="this.getDataOfAllTournaments()"></app-custom-table>
       } @else if (this.tabSwitch[1].status){
-        <app-custom-table [data]="this.getDataOfYourTournaments()"></app-custom-table>
+        <app-custom-table [type]="'tournament'" [data]="this.getDataOfYourTournaments()"></app-custom-table>
+      } @else if (this.tabSwitch[2].status){
+        <app-custom-table [type]="'user'" [data]="this.getDataOfAllUsers()"></app-custom-table>
       }
     </div>
     <div class="right">

@@ -11,6 +11,7 @@ import {User} from "../../models/user/user.model";
 import {UserService} from "../../services/user/user.service";
 import {ApiService} from "../../services/api/api.service";
 import {responseStandard} from "../../models/response.model";
+import {CustomValidators} from "../../validators/custom-validators";
 
 @Component({
   selector: 'app-custom-table',
@@ -30,7 +31,12 @@ export class CustomTableComponent implements OnInit{
   /**
    * Les données à afficher dans le tableau.
    */
-  @Input({required: true}) data: Tournament[] = [];
+  @Input({required: true}) data: any[] = [];
+
+  /**
+   * Le type de tableau à afficher.
+   */
+  @Input({required: true}) type!: 'tournament' | 'user';
 
   /**
    * Le statut de la popup de création de tournoi.
@@ -42,6 +48,45 @@ export class CustomTableComponent implements OnInit{
 
   /* Le statut de chargement pour la creation du tournoi */
   public isLoadingCreateForm: boolean = false;
+
+  /**
+   * Le statut de la popup de création d'utilisateur.
+   */
+  public statusPopupCreateUser: boolean = false;
+
+  /* Le formulaire de creation d'utilisateur */
+  public createUserForm!: FormGroup;
+
+  /* Le statut de chargement pour la creation d'utilisateur */
+  public isLoadingCreateUserForm: boolean = false;
+
+  /* Le statut de chargement pour suppression d'un utilisateur */
+  public isLoadingDeleteUser: boolean = false;
+
+  /**
+   * L'identifiant de l'utilisateur à modifier.
+   */
+  public userIdToModify: number | null = null;
+
+  /**
+   * Le statut de la popup de validation.
+   */
+  public statusPopupValidation: boolean = false;
+
+  /**
+   * Le type du role pour le formulaire de modification.
+   */
+  public roleType: 'ROLE_ADMIN' | 'ROLE_USER' = 'ROLE_USER';
+
+  /**
+   * Le type du status pour le formulaire de modification.
+   */
+  public statusType: 'active' | 'suspended' | 'banned' = 'active';
+
+  /**
+   * Les informations de l'utilisateur a modifier
+   */
+  public userInformationToModify: User | null = null;
 
   constructor(
     private readonly tournamentService: TournamentService,
@@ -68,6 +113,40 @@ export class CustomTableComponent implements OnInit{
       location: [null, Validators.required],
       numberPlayers: [null, Validators.required],
     });
+
+    this.createUserForm = this.formBuilder.group({
+      firstName: [this.userInformationToModify?.firstName ?? null, Validators.required],
+      lastName: [this.userInformationToModify?.lastName ?? null, Validators.required],
+      username: [this.userInformationToModify?.username ?? null, Validators.required],
+      role: [this.userInformationToModify?.roles ?? null, Validators.required],
+      email: [this.userInformationToModify?.emailAddress ?? null, Validators.required],
+      status: [this.userInformationToModify?.status ?? null, Validators.required]
+    });
+
+    this.roleType = this.userInformationToModify?.roles[0] ?? 'ROLE_USER';
+    this.statusType = this.userInformationToModify?.status ?? 'active';
+  }
+
+  /**
+   * Permet de changer le type du role.
+   */
+  public toggleRoleType(): void{
+    if (this.roleType === 'ROLE_ADMIN'){
+      this.roleType = 'ROLE_USER';
+      this.createUserForm.value.role = 'ROLE_USER';
+    } else {
+      this.roleType = 'ROLE_ADMIN';
+      this.createUserForm.value.role = 'ROLE_ADMIN';
+    }
+  }
+
+  /**
+   * Permet de changer le type du status.
+   * @param newStatus Le nouveau status.
+   */
+  public toggleStatusType(newStatus: 'active' | 'suspended' | 'banned'): void{
+    this.statusType = newStatus;
+    this.createUserForm.value.status = newStatus;
   }
 
   /**
@@ -105,6 +184,63 @@ export class CustomTableComponent implements OnInit{
   }
 
   /**
+   * Permet de changer le statut de la popup de validation.
+   * @param idUser L'identifiant de l'utilisateur.
+   */
+  public togglePopupValidation(idUser?: number): void {
+    this.statusPopupValidation = !this.statusPopupValidation;
+    if (idUser){
+      this.userIdToModify = idUser;
+    }
+  }
+
+  /**
+   * Permet de changer le statut de la popup de création d'utilisateur.
+   * @param idUserToModify L'identifiant de l'utilisateur à modifier.
+   */
+  public togglePopupCreateUser(idUserToModify?: number | null): void {
+    if (idUserToModify){
+      this.userInformationToModify = this.getUserInformationById(idUserToModify);
+      this.initForm();
+    }
+    this.statusPopupCreateUser = !this.statusPopupCreateUser;
+  }
+
+  /**
+   * Permet de supprimer un utilisateur.
+   */
+  public deleteUser(): void {
+    this.isLoadingDeleteUser = true;
+    this.informationPopupService.displayPopup('Cette utilisateur est en cours de suppression...', 'information');
+
+    if (this.userIdToModify){
+      this.userService.deleteUserById(this.userIdToModify)
+        .pipe(
+          map((data: responseStandard) => {
+            this.informationPopupService.displayPopup('Cette utilisateur a été supprimé avec succès !', 'success');
+          }),
+          tap(() => {
+            this.togglePopupValidation();
+            this.isLoadingDeleteUser = false;
+          }),
+          catchError((error: any) => {
+            this.isLoadingDeleteUser = false;
+            this.informationPopupService.displayPopup(error.error.message, 'error');
+            return of(error);
+          })
+      ).subscribe(() => {});
+    }
+  }
+
+  /**
+   * Permet de récupérer les informations de l'utilisateur à modifier.
+   * @param idUser L'identifiant de l'utilisateur.
+   */
+  private getUserInformationById(idUser: number): User | null {
+    return this.data.find((user: User) => user.id === idUser);
+  }
+
+  /**
    * Permet de créer un tournoi. Soumis par le formulaire.
    */
   public onSubmitCreateTournament(): void {
@@ -135,6 +271,37 @@ export class CustomTableComponent implements OnInit{
   }
 
   /**
+   * Permet de créer un utilisateur. Soumis par le formulaire.
+   */
+  public onSubmitCreateUser(): void {
+    this.isLoadingCreateUserForm = true;
+    if (this.userInformationToModify){
+      this.userService.updateUser(this.userInformationToModify.id, {
+        firstName : this.createUserForm.value.firstName,
+        lastName : this.createUserForm.value.lastName,
+        username : this.createUserForm.value.username,
+        emailAddress : this.createUserForm.value.email,
+        roles : [this.roleType],
+        status : this.statusType
+      })
+        .pipe(
+          map((data: responseStandard): void => {
+          this.informationPopupService.displayPopup('Les informations de cette utilisateur ont bien été mis à jour !', 'success');
+          this.togglePopupCreateUser();
+        }),
+        tap(() => {
+          this.isLoadingCreateUserForm = false;
+        }),
+        catchError((error: any) => {
+          this.informationPopupService.displayPopup(error.error.message, 'error');
+          this.isLoadingCreateUserForm = false;
+          return of(error);
+        })
+        ).subscribe(() => {});
+    }
+  }
+
+  /**
    * Elle permet de retourner le message reçu de la part du validator du formulaire.
    * @param controlName Nom du control du formulaire.
    * @returns {string} Retourne le message d'erreur du validateur.
@@ -144,6 +311,28 @@ export class CustomTableComponent implements OnInit{
     if (control && control.errors) {
       let errorKey : string = Object.keys(control.errors)[0];
       if (this.createForm?.get(controlName)?.value == null || this.createForm?.get(controlName)?.value === '') {
+        errorKey = Object.keys(control.errors)[1];
+      }
+
+      if (control.errors[errorKey] && control.errors[errorKey].message){
+        return control.errors[errorKey].message;
+      }
+
+      return 'Cette valeur n\'est pas valide.';
+    }
+    return 'Cette valeur n\'est pas valide.';
+  }
+
+  /**
+   * Elle permet de retourner le message reçu de la part du validator du formulaire.
+   * @param controlName Nom du control du formulaire.
+   * @returns {string} Retourne le message d'erreur du validateur.
+   */
+  public getErrorMessageOfValidatorForCreateUser(controlName: 'firstName' | 'lastName' | 'username' | 'role' | 'email' | 'status'): string {
+    const control = this.createUserForm?.get(controlName);
+    if (control && control.errors) {
+      let errorKey : string = Object.keys(control.errors)[0];
+      if (this.createUserForm?.get(controlName)?.value == null || this.createUserForm?.get(controlName)?.value === '') {
         errorKey = Object.keys(control.errors)[1];
       }
 

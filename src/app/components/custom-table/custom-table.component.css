@@ -83,7 +83,7 @@ thead > tr > th {
   white-space: nowrap;
   padding-bottom: 16px;
 }
-tbody > tr td > div {
+tbody > tr td > div, tbody > tr td .button {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -95,7 +95,7 @@ tbody > tr td > div {
   font-weight: 500;
   white-space: nowrap;
 }
-tbody > tr td > div > span{
+tbody > tr td > div > span, tbody > tr td .button > span{
   color: #707070;
   font-size: 14px;
   font-weight: 400;
@@ -105,11 +105,18 @@ tbody > tr td > div > span{
 tbody > tr td > .statut{
   gap: 6px !important;
 }
-tbody > tr td > .button{
+tbody > tr td .button{
+  padding: 0;
   gap: 4px !important;
   cursor: pointer;
 }
-tbody > tr td > .button:hover svg{
+tbody > tr td .button.delete span{
+  color: var(--errorColor);
+}
+tbody > tr td .button.delete:hover svg {
+  transform: none !important;
+}
+tbody > tr td .button:hover svg{
   transform: translateX(4px);
 }
 tbody > tr td > .statut.comming > span{
@@ -142,6 +149,16 @@ tbody > tr td > .statut.success > svg > .stroke{
 tbody > tr td > .statut.success > svg > .fill{
   fill: var(--successColor);
 }
+tbody > tr td > .statut.error > span{
+  color: var(--errorColor);
+  font-weight: 600 !important;
+}
+tbody > tr td > .statut.error > svg > .stroke{
+  stroke: var(--errorColor);
+}
+tbody > tr td > .statut.error > svg > .fill{
+  fill: var(--errorColor);
+}
 /* Le titre de la ligne */
 tbody > tr td > .title{
   display: flex;
@@ -172,4 +189,66 @@ tbody > tr td > .title > .lieu > span{
   color: var(--accentColor_500);
   font-size: 13px;
   font-weight: 500;
+}
+
+/* Les radios pour les inputs */
+.radioZone{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+.radioZone > input{
+  display: none;
+}
+.radioZone > button{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 32px;
+  border-radius: 8px;
+  background: #F9FAFA;
+  color: var(--secondaryColor);
+  font-size: 16px;
+  font-weight: 600;
+}
+.radioZone > button:hover{
+  background: #E9E9E9;
+}
+.radioZone > button.active{
+  background: var(--accentColor_500);
+  color: var(--primaryColor);
+}
+
+/* Les elements en plus pour la popup de validation de suppression*/
+.card > .text{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+}
+.card > .buttons{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.card > .buttons > button{
+  width: 100%;
+}
+.card > .text > span{
+  color: var(--secondaryColor);
+  font-size: 16px;
+  font-weight: 400;
+}
+.card > .text > .title{
+  color: var(--secondaryColor);
+  font-size: 28px !important;
+  font-weight: 600 !important;
 }

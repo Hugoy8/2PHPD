@@ -16,10 +16,20 @@ export interface UserInformation {
   user: User
 }
 
+/* Les informations qu'on recoit lorsqu'on récupère les données de tous les utilisateurs de l'application */
+export interface AllUserInformation {
+  status: number,
+  message: string,
+  number_of_users: number,
+  users: User[]
+}
+
 /* Le model pour les différentes informations à modifier */
 export interface UpdateUser {
   firstName?: string,
   lastName?: string,
   username?: string,
-  emailAddress?: string
+  emailAddress?: string,
+  roles?: ['ROLE_USER'] | ['ROLE_ADMIN'],
+  status?: "active" | "suspended" | "banned"
 }
