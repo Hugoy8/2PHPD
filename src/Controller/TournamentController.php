@@ -6,6 +6,7 @@ use App\Entity\Registration;
 use App\Entity\SportMatch;
 use App\Entity\Tournament;
 use App\Manager\WebsocketManager;
+use App\Repository\RegistrationRepository;
 use App\Repository\TournamentRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -69,22 +70,33 @@ class TournamentController extends AbstractController
      * @return JsonResponse // JsonResponse object
      */
     #[Route('tournaments', name: 'allTournaments', methods: ['GET'])]
-    public function getAllTournaments(TournamentRepository $tournamentRepository, SerializerInterface $serializer): JsonResponse
+    public function getAllTournaments(TournamentRepository $tournamentRepository, RegistrationRepository $registrationRepository,
+                                      SerializerInterface $serializer): JsonResponse
     {
 
         $tournamentList = $tournamentRepository->findAll();
+        $tournaments = [];
 
         foreach ($tournamentList as $tournament) {
-            $tournament->status = $tournament->getStatus();
-        }
+            $numberOfParticipants = count($registrationRepository->findBy(['tournament' => $tournament->getId()]));
+            $registration = $registrationRepository->findOneBy(['tournament' => $tournament->getId(), 'player' => $this->getUser()]);
+            $isUserRegistered = $registration?->getStatus();
+            if (!$isUserRegistered) {
+                $isUserRegistered = 'not registered';
+            }
+            $tournamentData = $serializer->normalize($tournament, null, ['groups' => 'getTournaments']);
+            $tournamentData['numberOfParticipants'] = $numberOfParticipants;
+            $tournamentData['isUserRegistered'] = $isUserRegistered;
 
-        $jsonTournamentList = $serializer->serialize($tournamentList, 'json', ['groups' => 'getTournaments']);
+            $tournaments[] = $tournamentData;
+        }
 
         $response = [
             'message' => 'List of all tournaments',
             'number_of_tournaments' => count($tournamentList),
             'status' => Response::HTTP_OK,
-            'tournaments' => json_decode($jsonTournamentList, true)
+            'tournaments' => $tournaments,
+            'numberOfTournamentsWhoHaveThePlayer' => count($tournamentRepository->findBy(['organizer' => $this->getUser()]))
         ];
 
         return new JsonResponse($response, Response::HTTP_OK);
