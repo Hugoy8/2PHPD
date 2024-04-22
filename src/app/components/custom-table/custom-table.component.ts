@@ -12,6 +12,7 @@ import {UserService} from "../../services/user/user.service";
 import {ApiService} from "../../services/api/api.service";
 import {responseStandard} from "../../models/response.model";
 import {CustomValidators} from "../../validators/custom-validators";
+import {TournamentPopupComponent} from "../popup/tournament-popup/tournament-popup.component";
 
 @Component({
   selector: 'app-custom-table',
@@ -22,7 +23,8 @@ import {CustomValidators} from "../../validators/custom-validators";
     LoaderComponent,
     LowercaseDirective,
     ReactiveFormsModule,
-    NgClass
+    NgClass,
+    TournamentPopupComponent
   ],
   templateUrl: './custom-table.component.html',
   styleUrl: './custom-table.component.css'
@@ -72,6 +74,16 @@ export class CustomTableComponent implements OnInit{
    * Le statut de la popup de validation.
    */
   public statusPopupValidation: boolean = false;
+
+  /**
+   * Le statut de la popup d'un tournoi
+   */
+  public statusPopupTournament: boolean = false;
+
+  /**
+   * L'instance de la classe TournamentPopupComponent.
+   */
+  public instanceOfTournamentPopup: TournamentPopupComponent | null = null;
 
   /**
    * Le type du role pour le formulaire de modification.
@@ -150,30 +162,28 @@ export class CustomTableComponent implements OnInit{
   }
 
   /**
-   * Permet de s'inscrire à un tournoi.
+   * Permet de changer le status de la popup d'un tournoi.
    * @param idTournament L'identifiant du tournoi.
    */
-  public async registerOfTournament(idTournament: number): Promise<void> {
-    this.informationPopupService.displayPopup('Votre inscription est en cours de traitement...', 'information');
-    const userInformation: User | null = await this.userService.user();
+  public togglePopupTournament(idTournament: number): void{
+    this.instanceOfTournamentPopup?.setIdTournament(idTournament);
+    this.instanceOfTournamentPopup?.initData();
+    this.statusPopupTournament = !this.statusPopupTournament;
+  }
 
-    if (userInformation){
-      this.tournamentService.createRegistrationTournament(idTournament, userInformation.id)
-        .pipe(
-          map((data: responseStandard) => {
-            this.informationPopupService.displayPopup('Votre inscription a bien été enregistrée. On vous attend bientôt !', 'success');
-          }),
-          tap(() => {
+  /**
+   * Permet d'assigner l'instance de la classe TournamentPopupComponent.
+   * @param instance L'instance de la classe TournamentPopupComponent.
+   */
+  public setInstanceOfTournamentPopup(instance: TournamentPopupComponent): void {
+    this.instanceOfTournamentPopup = instance;
+  }
 
-          }),
-          catchError((error: any) => {
-            this.informationPopupService.displayPopup(error.error.message, 'error');
-            return of(error);
-          })
-        ).subscribe(() => {});
-    } else {
-      this.informationPopupService.displayPopup('Impossible de récupérer vos informations utilisateurs. Merci de ressayer plus tard !', 'error');
-    }
+  /**
+   * Permet de fermer la popup d'un tournoi.
+   */
+  public closePopupTournament(): void {
+    this.statusPopupTournament = false;
   }
 
   /**

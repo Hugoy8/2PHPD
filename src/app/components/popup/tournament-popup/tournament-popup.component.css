@@ -1,0 +1,159 @@
+@import '../../../../stylesheet/popup.css';
+
+/* La card en elle même */
+.contain > .card{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 0;
+  overflow: hidden;
+  width: 550px;
+}
+.contain > .card > .top{
+  position: relative;
+  width: calc(100% - 24px);
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0px 0px 15px 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 73.5%, #FFF 100%), url('../../../../assets/tournaments/background_1.png') lightgray 50% / cover no-repeat;
+}
+.contain > .card > .top > .title{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+}
+.contain > .card > .top > .title > span{
+  color: var(--primaryColor);
+  text-shadow: 0px 4px 18.9px rgba(0, 0, 0, 0.25);
+  font-size: 36px;
+  font-weight: 800;
+}
+.contain > .card > .top > .title > div{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.contain > .card > .top > .title > div > span{
+  color: var(--accentColor_500);
+  font-size: 15px;
+  font-weight: 600;
+}
+.contain > .card > .top > .closeIconButton{
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+.contain > .card > .bottom{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 40px;
+  padding: 0 24px 24px 24px;
+  width: calc(100% - 48px);
+}
+/* Les informations du tournoi */
+.bottom > .information{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+.bottom > .information > .top{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.bottom > .information > .top > span{
+  color: var(--accentColor_500);
+  font-size: 16px;
+  font-weight: 600;
+}
+.bottom > .information > .description, .bottom > .information > .date, .bottom > .information > .organisation{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+.bottom > .information > .description > .title, .bottom > .information > .date > .title, .bottom > .information > .organisation > .title{
+  color: var(--secondaryColor);
+  font-size: 20px;
+  font-weight: 500;
+}
+.bottom > .information > .description > .text{
+  color: var(--secondaryColor);
+  font-size: 16px;
+  font-weight: 400;
+}
+.bottom > .information > .date > div, .bottom > .information > .organisation > div{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+/* Les différentes status du tournoi et des matchs */
+.status{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.status > span{
+  font-size: 14px;
+  font-weight: 600;
+}
+.status.comming > span{
+  color: var(--accentColor_500);
+}
+.status.comming > svg > .stroke{
+  stroke: var(--accentColor_500);
+}
+.status.comming > svg > .fill{
+  fill: var(--accentColor_500);
+}
+.status.waiting > span{
+  color: var(--warningColor);
+}
+.status.waiting > svg > .stroke{
+  stroke: var(--warningColor);
+}
+.status.waiting > svg > .fill{
+  fill: var(--warningColor);
+}
+.status.success > span{
+  color: var(--successColor);
+}
+.status.success > svg > .stroke{
+  stroke: var(--successColor);
+}
+.status.success > svg > .fill{
+  fill: var(--successColor);
+}
+.status.error > span{
+  color: var(--errorColor);
+}
+.status.error > svg > .stroke{
+  stroke: var(--errorColor);
+}
+.status.error > svg > .fill{
+  fill: var(--errorColor);
+}

@@ -24,3 +24,10 @@ export interface responseAllTournament {
   status: number,
   tournaments: Tournament[]
 }
+
+/* Le model pour la réponse pour les infos d'un tournoi */
+export interface responseTournament {
+  message: string,
+  status: number,
+  tournament: Tournament
+}

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {ApiService} from "../api/api.service";
-import {responseAllTournament} from "../../models/tournaments/tournament.model";
+import {responseAllTournament, responseTournament} from "../../models/tournaments/tournament.model";
 import {responseStandard} from "../../models/response.model";
 
 @Injectable({
@@ -20,6 +20,14 @@ export class TournamentService {
    */
   public getAllTournaments(): Observable<responseAllTournament> {
     return this.http.get<responseAllTournament>(this.apiService.getUrlApi + 'api/tournaments');
+  }
+
+  /**
+   * Permet de récupérer toutes les informations d'un tournoi à partir de son id.
+   * @param idTournament L'id du tournoi.
+   */
+  public getTournamentById(idTournament: number): Observable<responseTournament> {
+    return this.http.get<responseTournament>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament);
   }
 
   /**

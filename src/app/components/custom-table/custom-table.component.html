@@ -61,15 +61,7 @@
                 <span>{{ tournamentElement?.numberOfParticipants  }} / {{ tournamentElement?.maxParticipants }}</span>
               </div></td>
               <td>
-                @if (tournamentElement?.status == 'Ongoing'){
-                  <div class="statut comming">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle class="fill" cx="7" cy="7" r="3.5" fill="#5398FF"/>
-                      <circle class="stroke" cx="7" cy="7" r="5" stroke="#5398FF" stroke-opacity="0.5" stroke-width="3"/>
-                    </svg>
-                    <span>En cours</span>
-                  </div>
-                } @else if (tournamentElement?.status == 'Finished'){
+                @if (tournamentElement?.status == 'Finished'){
                   <div class="statut success">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle class="fill" cx="7" cy="7" r="3.5" fill="#5398FF"/>
@@ -77,31 +69,14 @@
                     </svg>
                     <span>Terminé</span>
                   </div>
-                } @else if (tournamentElement?.isUserRegistered == 'pending'){
-                  <div class="statut waiting">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle class="fill" cx="7" cy="7" r="3.5" fill="#5398FF"/>
-                      <circle class="stroke" cx="7" cy="7" r="5" stroke="#5398FF" stroke-opacity="0.5" stroke-width="3"/>
-                    </svg>
-                    <span>En attente</span>
-                  </div>
-                } @else if (tournamentElement?.isUserRegistered == 'registered'){
-                  <div class="statut success">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle class="fill" cx="7" cy="7" r="3.5" fill="#5398FF"/>
-                      <circle class="stroke" cx="7" cy="7" r="5" stroke="#5398FF" stroke-opacity="0.5" stroke-width="3"/>
-                    </svg>
-                    <span>Inscrit</span>
-                  </div>
-                } @else if (tournamentElement?.isUserRegistered == 'not registered') {
-                  <div class="button" (click)="this.registerOfTournament(tournamentElement?.id)">
-                    <span>S'inscrire</span>
-                    <svg width="14" height="11" viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M13.3438 5.56445C13.3438 5.73763 13.2754 5.8903 13.1387 6.02246L8.59277 10.5547C8.46061 10.6823 8.3125 10.7461 8.14844 10.7461C7.97982 10.7461 7.83854 10.6891 7.72461 10.5752C7.61068 10.4658 7.55371 10.3268 7.55371 10.1582C7.55371 10.0762 7.56738 9.9987 7.59473 9.92578C7.62207 9.84831 7.66309 9.78223 7.71777 9.72754L9.24902 8.16895L11.9629 5.70117L12.0996 6.03613L9.89844 6.17285H1.25098C1.07324 6.17285 0.927409 6.11589 0.813477 6.00195C0.704102 5.88802 0.649414 5.74219 0.649414 5.56445C0.649414 5.38672 0.704102 5.24089 0.813477 5.12695C0.927409 5.01302 1.07324 4.95605 1.25098 4.95605H9.89844L12.0996 5.09277L11.9629 5.43457L9.24902 2.95996L7.71777 1.40137C7.66309 1.34668 7.62207 1.28288 7.59473 1.20996C7.56738 1.13249 7.55371 1.05273 7.55371 0.970703C7.55371 0.802083 7.61068 0.663086 7.72461 0.553711C7.83854 0.439779 7.97982 0.382812 8.14844 0.382812C8.23047 0.382812 8.30794 0.398763 8.38086 0.430664C8.45833 0.462565 8.53353 0.514974 8.60645 0.587891L13.1387 5.10645C13.2754 5.23861 13.3438 5.39128 13.3438 5.56445Z" fill="#707070"/>
-                    </svg>
-                  </div>
                 } @else {
-                  <div>Aucune information</div>
+                  <div class="statut comming" style="cursor: pointer" (click)="this.togglePopupTournament(tournamentElement?.id)">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle class="fill" cx="7" cy="7" r="3.5" fill="#5398FF"/>
+                      <circle class="stroke" cx="7" cy="7" r="5" stroke="#5398FF" stroke-opacity="0.5" stroke-width="3"/>
+                    </svg>
+                    <span>En savoir plus</span>
+                  </div>
                 }
               </td>
             </tr>
@@ -191,6 +166,9 @@
 
 <!-- Popup de création de tournoi -->
 @if (this.type == 'tournament') {
+  <!-- Le popup pour les informations d'un tournoi -->
+  <app-tournament-popup [statusPopup]="this.statusPopupTournament" (statusPopupChange)="this.closePopupTournament()" [style.z-index]="this.statusPopupTournament ? 9999 : -1" (instanceOfComponent)="this.setInstanceOfTournamentPopup($event)"></app-tournament-popup>
+
   <div class="contain popup" [ngClass]="{'actived' : this.statusPopupCreateTournament}">
     <form [formGroup]="this.createForm" (ngSubmit)="this.onSubmitCreateTournament()" class="card">
       <span>
