@@ -147,7 +147,7 @@ class SportMatch
 
     public function getWinner(): ?User
     {
-        if ($this->getStatus() !== 'Finished') {
+        if ($this->getStatus() !== 'finished') {
             return null;
         }
 

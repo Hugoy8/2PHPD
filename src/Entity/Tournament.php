@@ -31,6 +31,7 @@ class Tournament
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['getTournaments', 'getRegistrations', 'getSportMatchs'])]
     #[Assert\NotBlank(message: 'Start date is required')]
+    #[Assert\GreaterThanOrEqual(value: 'today', message: 'The start date must be today or in the future')]
     #[Assert\Expression(
         expression: 'this.getEndDate() >= value',
         message: 'The start date must be before the end date'
