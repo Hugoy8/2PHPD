@@ -70,7 +70,7 @@ class GetMatchsResultsCommand extends Command
         $draws = 0;
 
         foreach ($matches as $match) {
-            if ($match->getStatus() === 'finished') {
+            if ($match->getStatus() === 'Finished') {
                 if ($match->getWinner() && (int)$match->getWinner()->getId() === (int)$idPlayer) {
                     $wins++;
                 } elseif ($match->getScorePlayer1() === $match->getScorePlayer2()) {

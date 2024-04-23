@@ -171,7 +171,17 @@ class UserController extends AbstractController
             throw new HttpException(Response::HTTP_BAD_REQUEST, $errors[0]->getMessage());
         }
 
-        if (!empty($updatedUser->getPassword())) {
+        $contentData = json_decode($request->getContent(), true);
+
+        if (!isset($contentData['password'])) {
+            $context = ['object_to_populate' => $user, 'default_constructor_arguments' => ['password' => $user->getPassword()]];
+        } else {
+            $context = ['object_to_populate' => $user];
+        }
+
+        $updatedUser = $serializer->deserialize($request->getContent(), User::class, 'json', $context);
+
+        if (!empty($updatedUser->getPassword()) && isset($contentData['password'])) {
             $updatedUser->setPassword($passwordHasher->hashPassword($updatedUser, $updatedUser->getPassword()));
         }
 

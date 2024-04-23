@@ -22,7 +22,7 @@ class MatchFixtures extends Fixture implements DependentFixtureInterface
             $match->setMatchDate($faker->dateTimeThisYear);
             $match->setScorePlayer1($faker->numberBetween(0,5));
             $match->setScorePlayer2($faker->numberBetween(0,5));
-            $match->setStatus($faker->randomElement(['finished', 'on going', 'scheduled']));
+            $match->setStatus($faker->randomElement(['Finished', 'On going', 'Pending']));
             $manager->persist($match);
         }
 

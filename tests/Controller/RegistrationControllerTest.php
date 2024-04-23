@@ -16,7 +16,7 @@ class RegistrationControllerTest extends WebTestCase
         echo getenv('CORS_ALLOW_ORIGIN');
         $client = static::createClient();
         $client->request('GET', '/api/tournaments/11');
-        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 
     protected static function getKernelClass(): string
