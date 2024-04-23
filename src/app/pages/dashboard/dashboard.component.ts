@@ -9,6 +9,7 @@ import {NgClass} from "@angular/common";
 import {TournamentService} from "../../services/tournament/tournament.service";
 import {catchError, map, of, tap} from "rxjs";
 import {AllUserInformation, User} from "../../models/user/user.model";
+import {WebsocketService} from "../../services/websocket/websocket.service";
 
 @Component({
   selector: 'app-dashboard',
@@ -63,11 +64,13 @@ export class DashboardComponent implements OnInit {
     public readonly authService: AuthService,
     private readonly informationPopupService: InformationPopupService,
     private readonly userService: UserService,
-    private readonly tournamentService: TournamentService
+    private readonly tournamentService: TournamentService,
+    private readonly websocketService: WebsocketService
   ) {}
 
   public async ngOnInit(): Promise<void> {
     this.authService.checkIfLoginIsValid();
+    await this.websocketService.connect();
 
     if (await this.userService.isAdmin()){
       this.tabSwitch.push({name: 'Administrateur', status: false});

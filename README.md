@@ -1,27 +1,62 @@
-# Scorelt
+# Scorelt - Gestion de Tournoi Sportif
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.10.
+Scorelt est une application web développée avec Angular 17, destinée à la gestion de tournois sportifs. Elle offre aux administrateurs la possibilité de créer, de suivre et de gérer des tournois et matchs efficacement.
 
-## Development server
+## Prérequis
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Avant d'installer et de lancer Scorelt, vous devez vous assurer que les outils suivants sont installés sur votre système :
 
-## Code scaffolding
+- [Node.js](https://nodejs.org/en/download/) (Version recommandée: 14.x ou plus)
+- [Angular CLI](https://angular.io/cli) (Version 17)
+- [Docker](https://docker.com/) pour la gestion des conteneurs
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Installation
 
-## Build
+Suivez ces étapes pour installer et configurer Scorelt :
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+1. **Clonez le dépôt Git :**
+   ```bash
+   git clone https://github.com/Hugoy8/2PHPD.git
+   git checkout front
+   ```
 
-## Running unit tests
+2. **Installez les dépendances :**
+   ```bash
+   npm install
+   ```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+3. **Configurez les variables d'environnement :**
+   Modifier les fichiers `environment.ts`, `environment.development.ts` et `environment.staging.ts` selon votre environnement de développement.
 
-## Running end-to-end tests
+## Démarrage de l'application
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+Pour lancer l'application en développement :
 
-## Further help
+```bash
+ng serve
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Ouvrez votre navigateur et allez à `http://localhost:4200/`. L'application se rechargera automatiquement si vous apportez des modifications aux fichiers sources.
+
+## Déploiement avec Docker
+
+Pour construire et démarrer l'application avec Docker, utilisez les commandes suivantes :
+
+```bash
+docker-compose up --build
+```
+
+Cela construira l'image Docker de Scorelt et lancera tous les services nécessaires définis dans votre `docker-compose.yml`. Accédez à `http://localhost:4200/` pour voir l'application en action.
+
+## Contribution
+
+Nous encourageons la contribution à ce projet ! Si vous avez des suggestions ou des corrections, n'hésitez pas à soumettre une pull request ou ouvrir un issue.
+
+## Licence
+
+Ce projet est licencié sous les termes de la licence MIT.
+
+## Contact
+
+- **Hugo Ponthieux & Hugo Barbosa** - _hugoy8_ & _hugobrbs_
+- **Lien du Projet** - [Scorelt GitHub](https://github.com/Hugoy8/2PHPD/tree/front)

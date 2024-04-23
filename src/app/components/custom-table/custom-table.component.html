@@ -291,7 +291,7 @@
   <!-- Popup avec les inscriptions au tournoi -->
   <div class="contain popup" [ngClass]="{'actived' : this.statusPopupRegistrationTable}">
     <div class="card" style="width: 950px;">
-      <app-custom-table [type]="'registration'" [data]="this.registrationInformation" [forceIdTourfnament]="this.tournamentIdToModify"></app-custom-table>
+      <app-custom-table [type]="'registration'" [data]="this.registrationInformation" [forceIdTournament]="this.tournamentIdToModify"></app-custom-table>
 
       <button tabindex="-1" type="button" (click)="this.togglePopupRegistrationTable()" class="closeIconButton">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">

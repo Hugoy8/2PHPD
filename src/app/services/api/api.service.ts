@@ -12,6 +12,11 @@ export class ApiService {
   private readonly _urlApi: string = environment.apiUrl;
 
   /**
+   * L'url du websocket.
+   */
+  private readonly _urlWebsocket: string = environment.websocketUrl;
+
+  /**
    * La date d'aujourd'hui. Sous le format 'YYYY-MM-DD'.
    */
   private dateToday!: string;
@@ -25,6 +30,13 @@ export class ApiService {
    */
   public get getUrlApi(): string {
     return this._urlApi;
+  }
+
+  /**
+   * Permet de récupérer l'url du websocket.
+   */
+  public get getUrlWebsocket(): string {
+    return this._urlWebsocket;
   }
 
   /**
