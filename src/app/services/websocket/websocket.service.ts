@@ -32,7 +32,7 @@ export class WebsocketService {
       };
 
       this.socket.onerror = (error) => {
-       this.informationPopupService.displayPopup(error.toString(), 'error');
+       this.informationPopupService.displayPopup('Un erreur est survenue pendant une opération diverse avec le Websocket. Merci de vérifier votre connexion internet ou contacter le support !', 'error');
       };
     } else {
       throw new Error('User not found for connection to WebSocket');
