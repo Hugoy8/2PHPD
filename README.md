@@ -23,7 +23,7 @@ Commandes nécessaires pour installer le projet :
 
 1. Lancez WAMP ou XAMP.
 2. Créez un utilisateur avec les droits admin sur la base de données.
-3. Modifiez le fichier `.env.local` pour la configuration de la base de données.
+3. Modifiez le fichier `.env.local` pour la configuration de la base de données `DATABASE_URL`.
 
 ## Création de la base de données
 
@@ -40,6 +40,14 @@ Commandes nécessaires pour installer le projet :
 
 - Pour récupérer les stats de partie d'un joueur : `php bin/console app:get-matchs-results {idPlayer} {idTournament}` (le tournoi peut être null)
 
+## Lancer les tests
+
+./vendor/bin/phpunit
+
 ## Documentation
 
 Consultez la documentation pour plus d'informations sur l'utilisation de l'API et du websocket.
+
+## Postman 
+
+Lien d'invitation : https://app.getpostman.com/join-team?invite_code=8690c97027d49d73ab3535f9bc3eefe9&target_code=a03aed0c19ae5254516ddf5c9fc50000

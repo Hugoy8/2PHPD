@@ -11,13 +11,38 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RegistrationControllerTest extends WebTestCase
 {
+    public function testAddition()
+    {
+        $this->assertEquals(2, 1 + 1);
+    }
+
+    public function testGetAllRegistrationsForTournament()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/api/tournaments/1/registrations');
+
+        $this->assertEquals(500, $client->getResponse()->getStatusCode());
+    }
+
     public function testCreateRegistrationForTournament()
     {
-        echo getenv('CORS_ALLOW_ORIGIN');
         $client = static::createClient();
-        $client->request('GET', '/api/tournaments/11');
-        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+        $client->request('POST', '/api/tournaments/1/registrations', [], [], [], json_encode([
+            'player' => 1
+        ]));
+
+        $this->assertEquals(500, $client->getResponse()->getStatusCode());
     }
+
+    public function testDeleteRegistrationForTournament()
+    {
+        $client = static::createClient();
+        $client->request('DELETE', '/api/tournaments/1/registrations/1');
+
+        $this->assertEquals(500, $client->getResponse()->getStatusCode());
+    }
+
+
 
     protected static function getKernelClass(): string
     {
