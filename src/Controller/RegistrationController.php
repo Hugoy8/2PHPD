@@ -183,4 +183,55 @@ class RegistrationController extends AbstractController
         ];
         return new JsonResponse($response, Response::HTTP_OK);
     }
+
+    #[Route('{idTournament}/registrations/{idRegistration}', name: 'updateRegistrationForTournament', methods: ['PUT'])]
+    public function updateRegistrationForTournament($idTournament, $idRegistration, Request $request, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    {
+        $idTournament = (int)$idTournament;
+        $idRegistration = (int)$idRegistration;
+
+        if (!$idRegistration || !$idTournament) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid registration or tournament id');
+        }
+
+        $currentUser = $this->getUser();
+
+        $tournament = $em->getRepository(Tournament::class)->find($idTournament);
+        if (!$tournament) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Tournament not found');
+        }
+
+        $registration = $em->getRepository(Registration::class)->find($idRegistration);
+        if (!$registration) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Registration not found');
+        }
+
+        if ($registration->getTournament()->getId() !== $tournament->getId()) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Registration does not belong to the tournament');
+        }
+
+        if ($currentUser->getId() !== $tournament->getOrganizer()->getId() &&
+            !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
+            throw new HttpException(Response::HTTP_FORBIDDEN, "You cannot update a registration");
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $status = $data['status'];
+
+        $registration->setStatus($status);
+
+        $errors = $validator->validate($registration);
+        if (count($errors) > 0) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, (string) $errors[0]->getMessage());
+        }
+
+        $em->persist($registration);
+        $em->flush();
+
+        $response = [
+            'message' => 'Registration updated successfully',
+            'status' => Response::HTTP_OK
+        ];
+        return new JsonResponse($response, Response::HTTP_OK);
+    }
 }
