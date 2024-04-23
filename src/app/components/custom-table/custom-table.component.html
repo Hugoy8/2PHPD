@@ -537,6 +537,20 @@
             </div>
           </div>
         </div>
+        <div class="inputElement" [ngClass]="{'errorActived': !this.modifyTournamentForm.get('winner')?.valid && this.modifyTournamentForm.get('winner')?.touched}">
+          <div class="labelZone">
+            <label for="winner">Vainqueur (ID)</label>
+          </div>
+          <div class="inputZone">
+            <input tabindex="3" type="number" id="winner" formControlName="winner">
+          </div>
+          <div class="errorMessage">
+            <svg width="16" height="16" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1.95898 11.3066C0.962891 11.3066 0.359375 10.6152 0.359375 9.71875C0.359375 9.44336 0.429688 9.16211 0.587891 8.89844L5.13477 0.976562C5.43359 0.443359 5.96094 0.173828 6.5 0.173828C7.03906 0.173828 7.56055 0.443359 7.86523 0.976562L12.4121 8.89844C12.5586 9.15625 12.6406 9.44336 12.6406 9.71875C12.6406 10.6152 12.0371 11.3066 11.041 11.3066H1.95898ZM6.50586 7.39258C6.79297 7.39258 6.96289 7.22266 6.96875 6.90625L7.05664 3.72461C7.0625 3.41406 6.81641 3.18555 6.5 3.18555C6.17188 3.18555 5.94336 3.4082 5.94922 3.71875L6.02539 6.90625C6.03125 7.2168 6.20117 7.39258 6.50586 7.39258ZM6.50586 9.35547C6.85156 9.35547 7.15625 9.08008 7.15625 8.72852C7.15625 8.37109 6.85742 8.0957 6.50586 8.0957C6.14844 8.0957 5.84961 8.37695 5.84961 8.72852C5.84961 9.07422 6.1543 9.35547 6.50586 9.35547Z" fill="#FF1000"/>
+            </svg>
+            <span>{{ this.getErrorMessageOfValidatorModifyTournament('winner') }}</span>
+          </div>
+        </div>
       </div>
       <button tabindex="3" type="submit" [disabled]="this.modifyTournamentForm.invalid" class="primaryButtonAccent">
         @if (this.isLoadingCreateForm){

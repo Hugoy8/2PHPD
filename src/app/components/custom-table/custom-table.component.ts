@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Tournament} from "../../models/tournaments/tournament.model";
+import {Tournament, UpdateTournament} from "../../models/tournaments/tournament.model";
 import {DatePipe, JsonPipe, NgClass} from "@angular/common";
 import {TournamentService} from "../../services/tournament/tournament.service";
 import {InformationPopupService} from "../../services/popups/information-popup/information-popup.service";
@@ -217,6 +217,7 @@ export class CustomTableComponent implements OnInit{
       endDate: [this.transformDate(tournament?.endDate) ?? null, Validators.required],
       location: [tournament?.location ?? null, Validators.required],
       numberPlayers: [tournament?.maxParticipants ?? null, Validators.required],
+      winner: [tournament?.winner?.id ?? null]
     });
   }
 
@@ -451,7 +452,7 @@ export class CustomTableComponent implements OnInit{
   public onSubmitModifyTournament(): void {
     if (this.tournamentIdToModify) {
       this.statusPopupModifyTournament = true;
-      this.tournamentService.modifyTournament(this.tournamentIdToModify, {
+      let data: UpdateTournament = {
         tournamentName: this.modifyTournamentForm.value.name,
         location: this.modifyTournamentForm.value.location,
         description: this.modifyTournamentForm.value.description,
@@ -459,7 +460,12 @@ export class CustomTableComponent implements OnInit{
         startDate: this.modifyTournamentForm.value.startDate,
         endDate: this.modifyTournamentForm.value.endDate,
         sport: this.modifyTournamentForm.value.sport
-      })
+      }
+      if (this.modifyTournamentForm.value.winner){
+        data['winner'] = this.modifyTournamentForm.value.winner;
+      }
+
+      this.tournamentService.modifyTournament(this.tournamentIdToModify, data)
         .pipe(
           map((data: responseStandard): void => {
 
@@ -539,7 +545,7 @@ export class CustomTableComponent implements OnInit{
    * @param controlName Nom du control du formulaire.
    * @returns {string} Retourne le message d'erreur du validateur.
    */
-  public getErrorMessageOfValidatorModifyTournament(controlName: 'name' | 'sport' | 'description' | 'startDate' | 'endDate' | 'location' | 'numberPlayers'): string {
+  public getErrorMessageOfValidatorModifyTournament(controlName: 'name' | 'sport' | 'description' | 'startDate' | 'endDate' | 'location' | 'numberPlayers' | 'winner'): string {
     const control = this.modifyTournamentForm?.get(controlName);
     if (control && control.errors) {
       let errorKey : string = Object.keys(control.errors)[0];
