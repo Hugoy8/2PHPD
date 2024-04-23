@@ -127,12 +127,12 @@
       <span>Voici les résultats d'un match. Vous retrouverez les résultats pour les deux joueurs en détailles.</span>
     </div>
     <div class="inputsContainer" style="gap: 16px">
-      <div class="inputElement" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')),'errorActived': !this.resultMatchForm.get('scorePlayer1')?.valid && this.resultMatchForm.get('scorePlayer1')?.touched}">
+      <div class="inputElement" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) || this.isPlayerInMatch(),'errorActived': !this.resultMatchForm.get('scorePlayer1')?.valid && this.resultMatchForm.get('scorePlayer1')?.touched}">
         <div class="labelZone">
-          <label for="scorePlayer1">Score joueur n°1</label>
+          <label for="scorePlayer1" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) || this.isPlayerInMatch()}">Score joueur n°1</label>
         </div>
         <div class="inputZone">
-          <input [tabindex]="(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) ? 1 : -1" type="number" id="scorePlayer1" formControlName="scorePlayer1">
+          <input [tabindex]="(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) || this.isPlayerInMatch() ? 1 : -1" type="number" id="scorePlayer1" formControlName="scorePlayer1">
         </div>
         <div class="errorMessage">
           <svg width="16" height="16" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -141,9 +141,9 @@
           <span>{{ this.getErrorMessageOfValidatorResultMatch('scorePlayer1') }}</span>
         </div>
       </div>
-      <div class="inputElement" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')),'errorActived': !this.resultMatchForm.get('scorePlayer2')?.valid && this.resultMatchForm.get('scorePlayer2')?.touched}">
+      <div class="inputElement" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) || this.isPlayerInMatch(),'errorActived': !this.resultMatchForm.get('scorePlayer2')?.valid && this.resultMatchForm.get('scorePlayer2')?.touched}">
         <div class="labelZone">
-          <label for="scorePlayer2">Score joueur n°2</label>
+          <label for="scorePlayer2" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) || this.isPlayerInMatch()}">Score joueur n°2</label>
         </div>
         <div class="inputZone">
           <input [tabindex]="(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) ? 2 : -1" type="number" id="scorePlayer2" formControlName="scorePlayer2">
@@ -156,7 +156,7 @@
         </div>
       </div>
     </div>
-    @if (this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')){
+    @if (this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN') || this.isPlayerInMatch()){
       <button type="submit" tabindex="3" [disabled]="this.resultMatchForm.invalid" class="primaryButtonAccent">
         @if (this.isLoadingResultMatch){
           <app-loader [size]="25" [sizeStroke]="3"></app-loader>

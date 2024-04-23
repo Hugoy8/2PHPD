@@ -115,8 +115,8 @@ export class TournamentPopupComponent implements OnInit{
    */
   private initForm(): void {
     this.resultMatchForm = this.formBuilder.group({
-      scorePlayer1: [this.getMatchById()?.scorePlayer1 ?? null, Validators.required],
-      scorePlayer2: [this.getMatchById()?.scorePlayer2 ?? null, Validators.required]
+      scorePlayer1: [this.getMatchById()?.scorePlayer1 ?? null],
+      scorePlayer2: [this.getMatchById()?.scorePlayer2 ?? null]
     });
 
     this.addMatchForm = this.formBuilder.group({
@@ -259,6 +259,22 @@ export class TournamentPopupComponent implements OnInit{
             return of(error);
           })
         ).subscribe(() => {});
+    }
+  }
+
+  /**
+   * Permet de savoir si un joueur est dans le match sélectionné.
+   */
+  public isPlayerInMatch(): boolean {
+    if (this.userInformation){
+      const match: Match | null = this.getMatchById();
+      if (match){
+        return match.player1.id === this.userInformation.id || match.player2.id === this.userInformation.id;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
     }
   }
 

@@ -13,7 +13,7 @@ export class InformationPopupService{
 
   // TimeOut Element
   private timeoutElement: any;
-  private readonly TIMEOUT_DURATION: number = 4000;
+  private readonly TIMEOUT_DURATION: number = 8000;
 
   constructor() {}
 
