@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {ApiService} from "../api/api.service";
-import {responseAllTournament, responseTournament} from "../../models/tournaments/tournament.model";
+import {responseAllTournament, responseTournament, UpdateTournament} from "../../models/tournaments/tournament.model";
 import {responseStandard} from "../../models/response.model";
+import {allMatchsTournament} from "../../models/tournaments/match.model";
 
 @Injectable({
   providedIn: 'root'
@@ -45,6 +46,33 @@ export class TournamentService {
   }
 
   /**
+   * Permet de supprimer un tournoi à partir de son id.
+   * @param idTournament L'id du tournoi.
+   */
+  public deleteTournamentById(idTournament: number): Observable<responseStandard> {
+    return this.http.delete<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament);
+  }
+
+  /**
+   * Permet de modifier un tournoi.
+   * @param idTournament L'id du tournoi.
+   * @param data Les infos du tournoi.
+   */
+  public modifyTournament(idTournament: number, data: UpdateTournament): Observable<responseStandard> {
+    return this.http.put<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament, data)
+  }
+
+  /**
+   * Permet de modifier le score d'un match.
+   * @param idMatch L'id du match.
+   * @param idTournament L'id du tournoi.
+   * @param data Les scores des joueurs.
+   */
+  public modifyMatch(idMatch: number, idTournament: number, data: {scorePlayer1: number, scorePlayer2: number}): Observable<responseStandard> {
+    return this.http.put<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/sport-matchs/' + idMatch, data)
+  }
+
+  /**
    * Permet de créer un tournoi.
    * @param name Le nom du tournoi.
    * @param description La description du tournoi.
@@ -54,8 +82,8 @@ export class TournamentService {
    * @param sport Le sport du tournoi.
    * @param location L'emplacement du tournoi. Le lieu.
    */
-  public createTournament(name: string, description: string, startDate: string, endDate: string, maxPlayers: number, sport: string, location: string): Observable<any> {
-    return this.http.post<any>(
+  public createTournament(name: string, description: string, startDate: string, endDate: string, maxPlayers: number, sport: string, location: string): Observable<responseStandard> {
+    return this.http.post<responseStandard>(
       this.apiService.getUrlApi + 'api/tournaments',
       {
         tournamentName: name,
@@ -67,5 +95,13 @@ export class TournamentService {
         Location: location
       }
     )
+  }
+
+  /**
+   * Permet de récupérer tous les matchs d'un tournoi en particulier.
+   * @param idTournament L'id du tournoi.
+   */
+  public getAllMatchsOfTournamentById(idTournament: number): Observable<allMatchsTournament> {
+    return this.http.get<allMatchsTournament>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/sport-matchs');
   }
 }

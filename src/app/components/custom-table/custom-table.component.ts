@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Tournament} from "../../models/tournaments/tournament.model";
+import {Tournament, UpdateTournament} from "../../models/tournaments/tournament.model";
 import {DatePipe, NgClass} from "@angular/common";
 import {TournamentService} from "../../services/tournament/tournament.service";
 import {InformationPopupService} from "../../services/popups/information-popup/information-popup.service";
@@ -13,6 +13,7 @@ import {ApiService} from "../../services/api/api.service";
 import {responseStandard} from "../../models/response.model";
 import {CustomValidators} from "../../validators/custom-validators";
 import {TournamentPopupComponent} from "../popup/tournament-popup/tournament-popup.component";
+import {isPromise} from "rxjs/internal/util/isPromise";
 
 @Component({
   selector: 'app-custom-table',
@@ -45,8 +46,16 @@ export class CustomTableComponent implements OnInit{
    */
   public statusPopupCreateTournament: boolean = false;
 
+  /**
+   * Le statut de la popup de modification de tournoi.
+   */
+  public statusPopupModifyTournament: boolean = false;
+
   /* Le formulaire de creation de tournoi */
   public createForm!: FormGroup;
+
+  /* Le formulaire de modification de tournoi */
+  public modifyTournamentForm!: FormGroup;
 
   /* Le statut de chargement pour la creation du tournoi */
   public isLoadingCreateForm: boolean = false;
@@ -65,15 +74,28 @@ export class CustomTableComponent implements OnInit{
   /* Le statut de chargement pour suppression d'un utilisateur */
   public isLoadingDeleteUser: boolean = false;
 
+  /* Le statut de chargement pour suppression d'un tournoi */
+  public isLoadingDeleteTournament: boolean = false;
+
   /**
    * L'identifiant de l'utilisateur à modifier.
    */
   public userIdToModify: number | null = null;
 
   /**
+   * L'identifiant de d'un tournoi à modifier.
+   */
+  public tournamentIdToModify: number | null = null;
+
+  /**
    * Le statut de la popup de validation.
    */
   public statusPopupValidation: boolean = false;
+
+   /**
+   * Le statut de la popup de validation pour la suppression d'un tournoi.
+   */
+  public statusPopupValidationTournament: boolean = false;
 
   /**
    * Le statut de la popup d'un tournoi
@@ -100,6 +122,11 @@ export class CustomTableComponent implements OnInit{
    */
   public userInformationToModify: User | null = null;
 
+  /**
+   * Les informations de l'utilisateur connecté.
+   */
+  public userInformation: User | null = null;
+
   constructor(
     private readonly tournamentService: TournamentService,
     private readonly informationPopupService: InformationPopupService,
@@ -108,8 +135,10 @@ export class CustomTableComponent implements OnInit{
     public readonly apiService: ApiService
   ) {}
 
-  public ngOnInit(): void {
+  public async ngOnInit(): Promise<void> {
     this.initForm();
+    this.initModifyForm();
+    this.userInformation = await this.userService.user();
   }
 
   /**
@@ -137,6 +166,35 @@ export class CustomTableComponent implements OnInit{
 
     this.roleType = this.userInformationToModify?.roles[0] ?? 'ROLE_USER';
     this.statusType = this.userInformationToModify?.status ?? 'active';
+  }
+
+  /**
+   * Permet d'initialiser le formulaire de modification de tournoi.
+   */
+  private initModifyForm(): void {
+    const tournament: Tournament | undefined = this.data.find((tournament: Tournament) => tournament.id === this.tournamentIdToModify);
+
+    this.modifyTournamentForm = this.formBuilder.group({
+      name: [tournament?.tournamentName ?? null, Validators.required],
+      sport: [tournament?.sport ?? null, Validators.required],
+      description: [tournament?.description ?? null, Validators.required],
+      startDate: [this.transformDate(tournament?.startDate) ?? null, Validators.required],
+      endDate: [this.transformDate(tournament?.endDate) ?? null, Validators.required],
+      location: [tournament?.location ?? null, Validators.required],
+      numberPlayers: [tournament?.maxParticipants ?? null, Validators.required],
+    });
+  }
+
+  /**
+   * Permet de transformer la date reçu en paramètre sous le format 'YYYY-MM-DD';
+   * @param date La date à transformer.
+   */
+  private transformDate(date: string | undefined): string | null {
+    if (date){
+      return new Date(date).toISOString().split('T')[0];
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -194,6 +252,18 @@ export class CustomTableComponent implements OnInit{
   }
 
   /**
+   * Permet de changer le statut de la popup de modification de tournoi.
+   * @param idTournament L'identifiant du tournoi.
+   */
+  public togglePopupModifyTournament(idTournament?: number): void {
+    this.statusPopupModifyTournament = !this.statusPopupModifyTournament;
+    if (idTournament){
+      this.tournamentIdToModify = idTournament;
+      this.initModifyForm();
+    }
+  }
+
+  /**
    * Permet de changer le statut de la popup de validation.
    * @param idUser L'identifiant de l'utilisateur.
    */
@@ -201,6 +271,17 @@ export class CustomTableComponent implements OnInit{
     this.statusPopupValidation = !this.statusPopupValidation;
     if (idUser){
       this.userIdToModify = idUser;
+    }
+  }
+
+  /**
+   * Permet de changer le statut de la popup de validation pour la suppression d'un tournoi
+   * @param idTournament L'identifiant du tournoi.
+   */
+  public togglePopupValidationTournament(idTournament?: number): void {
+    this.statusPopupValidationTournament = !this.statusPopupValidationTournament;
+    if (idTournament){
+      this.tournamentIdToModify = idTournament;
     }
   }
 
@@ -221,8 +302,6 @@ export class CustomTableComponent implements OnInit{
    */
   public deleteUser(): void {
     this.isLoadingDeleteUser = true;
-    this.informationPopupService.displayPopup('Cette utilisateur est en cours de suppression...', 'information');
-
     if (this.userIdToModify){
       this.userService.deleteUserById(this.userIdToModify)
         .pipe(
@@ -239,6 +318,45 @@ export class CustomTableComponent implements OnInit{
             return of(error);
           })
       ).subscribe(() => {});
+    }
+  }
+
+  /**
+   * Permet de supprimer un tournoi.
+   */
+  public deleteTournament(): void {
+    this.isLoadingDeleteTournament = true;
+    if (this.tournamentIdToModify){
+      this.tournamentService.deleteTournamentById(this.tournamentIdToModify)
+        .pipe(
+          map((data: responseStandard) => {
+            this.informationPopupService.displayPopup('Ce tournoi a été supprimé avec succès !', 'success');
+          }),
+          tap(() => {
+            this.togglePopupValidationTournament();
+            this.isLoadingDeleteTournament = false;
+          }),
+          catchError((error: any) => {
+            this.isLoadingDeleteTournament = false;
+            this.informationPopupService.displayPopup(error.error.message, 'error');
+            return of(error);
+          })
+      ).subscribe(() => {});
+    }
+  }
+
+  /**
+   * Permet de vérifier si le tounois en paramètre est bien créé par l'utilisateur.
+   * @param idTournament L'identifiant du tournoi.
+   * @return {boolean} Retourne vrai si le tournoi est bien créé par l'utilisateur.
+   */
+  public verifyIfTournamentIsByUser(idTournament: number): boolean {
+    if (this.userInformation){
+      return this.data.find((tournament: Tournament) => {
+        return tournament.id === idTournament && tournament.organizer.id === this.userInformation?.id;
+      });
+    } else {
+      return false;
     }
   }
 
@@ -278,6 +396,42 @@ export class CustomTableComponent implements OnInit{
           return of(error);
         })
       ).subscribe(() => {});
+  }
+
+  /**
+   * Permet de modifier un tournoi. Soumis par le formulaire.
+   */
+  public onSubmitModifyTournament(): void {
+    if (this.tournamentIdToModify) {
+      this.statusPopupModifyTournament = true;
+      this.tournamentService.modifyTournament(this.tournamentIdToModify, {
+        tournamentName: this.modifyTournamentForm.value.name,
+        location: this.modifyTournamentForm.value.location,
+        description: this.modifyTournamentForm.value.description,
+        maxParticipants: this.modifyTournamentForm.value.numberPlayers,
+        startDate: this.modifyTournamentForm.value.startDate,
+        endDate: this.modifyTournamentForm.value.endDate,
+        sport: this.modifyTournamentForm.value.sport
+      })
+        .pipe(
+          map((data: responseStandard): void => {
+
+            this.informationPopupService.displayPopup('Le tournoi a été modifié avec succès !', 'success');
+            this.togglePopupModifyTournament();
+          }),
+          tap(() => {
+            this.statusPopupModifyTournament = false;
+          }),
+          catchError((error: any) => {
+            this.informationPopupService.displayPopup(error.error.message, 'error');
+            this.statusPopupModifyTournament = false;
+            return of(error);
+          })
+        ).subscribe(() => {
+      });
+    } else {
+      this.informationPopupService.displayPopup('Impossible de modifier ce tournoi. Merci de réssayer plus tard.', 'error');
+    }
   }
 
   /**
@@ -321,6 +475,28 @@ export class CustomTableComponent implements OnInit{
     if (control && control.errors) {
       let errorKey : string = Object.keys(control.errors)[0];
       if (this.createForm?.get(controlName)?.value == null || this.createForm?.get(controlName)?.value === '') {
+        errorKey = Object.keys(control.errors)[1];
+      }
+
+      if (control.errors[errorKey] && control.errors[errorKey].message){
+        return control.errors[errorKey].message;
+      }
+
+      return 'Cette valeur n\'est pas valide.';
+    }
+    return 'Cette valeur n\'est pas valide.';
+  }
+
+  /**
+   * Elle permet de retourner le message reçu de la part du validator du formulaire.
+   * @param controlName Nom du control du formulaire.
+   * @returns {string} Retourne le message d'erreur du validateur.
+   */
+  public getErrorMessageOfValidatorModifyTournament(controlName: 'name' | 'sport' | 'description' | 'startDate' | 'endDate' | 'location' | 'numberPlayers'): string {
+    const control = this.modifyTournamentForm?.get(controlName);
+    if (control && control.errors) {
+      let errorKey : string = Object.keys(control.errors)[0];
+      if (this.modifyTournamentForm?.get(controlName)?.value == null || this.modifyTournamentForm?.get(controlName)?.value === '') {
         errorKey = Object.keys(control.errors)[1];
       }
 

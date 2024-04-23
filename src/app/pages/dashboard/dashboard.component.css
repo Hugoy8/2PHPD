@@ -27,7 +27,7 @@
 }
 .contain > .cards{
   width: 100%;
-  height: 100%;
+  height: calc(100% - 96px - 34px - 48px);
   display: flex;
   flex-direction: row;
   justify-content: center;

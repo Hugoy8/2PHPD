@@ -37,10 +37,10 @@
   top: 32px;
   right: 32px;
 }
-.contain > .card > span{
+.contain > .card > span, .card > .text > .title{
   color: var(--secondaryColor);
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 28px !important;
+  font-weight: 600 !important;
 }
 .contain > .card > .inputsContainer{
   width: 100%;
@@ -49,4 +49,28 @@
   justify-content: center;
   align-items: center;
   gap: 24px;
+}
+.card > .text{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+}
+.card > .buttons{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.card > .buttons > button{
+  width: 100%;
+}
+.card > .text > span{
+  color: var(--secondaryColor);
+  font-size: 16px;
+  font-weight: 400;
 }

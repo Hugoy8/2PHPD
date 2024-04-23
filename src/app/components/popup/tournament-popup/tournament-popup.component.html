@@ -45,7 +45,7 @@
             </div>
           }
 
-          <span>Participation : {{ this.tournamentInformation?.numberOfParticipants }} / {{ this.tournamentInformation?.maxParticipants }}</span>
+          <span>Participants : {{ this.tournamentInformation?.numberOfParticipants }} / {{ this.tournamentInformation?.maxParticipants }}</span>
         </div>
         <div class="description" style="gap: 8px;">
           <span class="title">Description</span>
@@ -62,8 +62,23 @@
         </div>
         <div class="organisation">
           <span class="title">Organisation</span>
-          <div>
-
+          @if (this.matchInformation.length <= 0){
+            <span>Aucun match pour le moment</span>
+          }
+          <div class="matchs">
+            @for (match of this.matchInformation; track match.id){
+              <div class="match">
+                <i class="circle"></i>
+                <span class="title">{{ match.player1.username }} VS {{ match.player2.username }}</span>
+                <span class="date">Le {{ match.matchDate | date:'d MMM yyyy à HH\'h\'mm' }}</span>
+                <button (click)="this.togglePopupResultMatch(match.id)">
+                  Voir le résultat
+                  <svg width="12" height="11" viewBox="0 0 12 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.8906 5.41699C11.8906 5.5778 11.8271 5.71956 11.7002 5.84229L7.479 10.0508C7.35628 10.1693 7.21875 10.2285 7.06641 10.2285C6.90983 10.2285 6.77865 10.1756 6.67285 10.0698C6.56706 9.96826 6.51416 9.83919 6.51416 9.68262C6.51416 9.60645 6.52686 9.53451 6.55225 9.4668C6.57764 9.39486 6.61572 9.3335 6.6665 9.28271L8.08838 7.83545L10.6084 5.54395L10.7354 5.85498L8.69141 5.98193H0.661621C0.496582 5.98193 0.361165 5.92904 0.255371 5.82324C0.153809 5.71745 0.103027 5.58203 0.103027 5.41699C0.103027 5.25195 0.153809 5.11654 0.255371 5.01074C0.361165 4.90495 0.496582 4.85205 0.661621 4.85205H8.69141L10.7354 4.979L10.6084 5.29639L8.08838 2.99854L6.6665 1.55127C6.61572 1.50049 6.57764 1.44124 6.55225 1.37354C6.52686 1.3016 6.51416 1.22754 6.51416 1.15137C6.51416 0.994792 6.56706 0.865723 6.67285 0.76416C6.77865 0.658366 6.90983 0.605469 7.06641 0.605469C7.14258 0.605469 7.21452 0.62028 7.28223 0.649902C7.35417 0.679525 7.42399 0.72819 7.4917 0.795898L11.7002 4.9917C11.8271 5.11442 11.8906 5.25618 11.8906 5.41699Z" fill="black"/>
+                  </svg>
+                </button>
+              </div>
+            }
           </div>
         </div>
       </div>
@@ -85,4 +100,58 @@
         }
     </div>
   </div>
+</div>
+
+<!-- Popup pour les résultats des matchs -->
+<div class="contain popup" [ngClass]="{'actived' : this.statusPopupResult}">
+  <form [formGroup]="this.resultMatchForm" (ngSubmit)="this.onSubmitResultMatch()" class="card" style="width: 400px; gap: 32px;padding: 40px;">
+    <div class="text">
+      <span class="title">Résultat</span>
+      <span>Voici les résultats d'un match. Vous retrouverez les résultats pour les deux joueurs en détailles.</span>
+    </div>
+    <div class="inputsContainer" style="gap: 16px">
+      <div class="inputElement" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')),'errorActived': !this.resultMatchForm.get('scorePlayer1')?.valid && this.resultMatchForm.get('scorePlayer1')?.touched}">
+        <div class="labelZone">
+          <label for="scorePlayer1">Score joueur n°1</label>
+        </div>
+        <div class="inputZone">
+          <input [tabindex]="(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) ? 1 : -1" type="number" id="scorePlayer1" formControlName="scorePlayer1">
+        </div>
+        <div class="errorMessage">
+          <svg width="16" height="16" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.95898 11.3066C0.962891 11.3066 0.359375 10.6152 0.359375 9.71875C0.359375 9.44336 0.429688 9.16211 0.587891 8.89844L5.13477 0.976562C5.43359 0.443359 5.96094 0.173828 6.5 0.173828C7.03906 0.173828 7.56055 0.443359 7.86523 0.976562L12.4121 8.89844C12.5586 9.15625 12.6406 9.44336 12.6406 9.71875C12.6406 10.6152 12.0371 11.3066 11.041 11.3066H1.95898ZM6.50586 7.39258C6.79297 7.39258 6.96289 7.22266 6.96875 6.90625L7.05664 3.72461C7.0625 3.41406 6.81641 3.18555 6.5 3.18555C6.17188 3.18555 5.94336 3.4082 5.94922 3.71875L6.02539 6.90625C6.03125 7.2168 6.20117 7.39258 6.50586 7.39258ZM6.50586 9.35547C6.85156 9.35547 7.15625 9.08008 7.15625 8.72852C7.15625 8.37109 6.85742 8.0957 6.50586 8.0957C6.14844 8.0957 5.84961 8.37695 5.84961 8.72852C5.84961 9.07422 6.1543 9.35547 6.50586 9.35547Z" fill="#FF1000"/>
+          </svg>
+          <span>{{ this.getErrorMessageOfValidatorResultMatch('scorePlayer1') }}</span>
+        </div>
+      </div>
+      <div class="inputElement blocked" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')),'errorActived': !this.resultMatchForm.get('scorePlayer2')?.valid && this.resultMatchForm.get('scorePlayer2')?.touched}">
+        <div class="labelZone">
+          <label for="scorePlayer2">Score joueur n°2</label>
+        </div>
+        <div class="inputZone">
+          <input [tabindex]="(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')) ? 2 : -1" type="number" id="scorePlayer2" formControlName="scorePlayer2">
+        </div>
+        <div class="errorMessage">
+          <svg width="16" height="16" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.95898 11.3066C0.962891 11.3066 0.359375 10.6152 0.359375 9.71875C0.359375 9.44336 0.429688 9.16211 0.587891 8.89844L5.13477 0.976562C5.43359 0.443359 5.96094 0.173828 6.5 0.173828C7.03906 0.173828 7.56055 0.443359 7.86523 0.976562L12.4121 8.89844C12.5586 9.15625 12.6406 9.44336 12.6406 9.71875C12.6406 10.6152 12.0371 11.3066 11.041 11.3066H1.95898ZM6.50586 7.39258C6.79297 7.39258 6.96289 7.22266 6.96875 6.90625L7.05664 3.72461C7.0625 3.41406 6.81641 3.18555 6.5 3.18555C6.17188 3.18555 5.94336 3.4082 5.94922 3.71875L6.02539 6.90625C6.03125 7.2168 6.20117 7.39258 6.50586 7.39258ZM6.50586 9.35547C6.85156 9.35547 7.15625 9.08008 7.15625 8.72852C7.15625 8.37109 6.85742 8.0957 6.50586 8.0957C6.14844 8.0957 5.84961 8.37695 5.84961 8.72852C5.84961 9.07422 6.1543 9.35547 6.50586 9.35547Z" fill="#FF1000"/>
+          </svg>
+          <span>{{ this.getErrorMessageOfValidatorResultMatch('scorePlayer2') }}</span>
+        </div>
+      </div>
+    </div>
+    @if (this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')){
+      <button type="submit" tabindex="3" [disabled]="this.resultMatchForm.invalid" class="primaryButtonAccent">
+        @if (this.isLoadingResultMatch){
+          <app-loader [size]="25" [sizeStroke]="3"></app-loader>
+        }
+        Enregistrer
+      </button>
+    }
+
+    <button tabindex="-1" type="button" (click)="this.togglePopupResultMatch()" class="closeIconButton">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.921875 13.4453C0.791667 13.3151 0.705729 13.1641 0.664062 12.9922C0.622396 12.8203 0.622396 12.6484 0.664062 12.4766C0.705729 12.3047 0.789062 12.1562 0.914062 12.0312L5.57031 7.36719L0.914062 2.71094C0.789062 2.59115 0.705729 2.44531 0.664062 2.27344C0.627604 2.09635 0.627604 1.92188 0.664062 1.75C0.705729 1.57812 0.791667 1.42708 0.921875 1.29688C1.04688 1.16667 1.19531 1.08073 1.36719 1.03906C1.54427 0.997396 1.71875 0.997396 1.89062 1.03906C2.06771 1.08073 2.21875 1.16406 2.34375 1.28906L7 5.94531L11.6562 1.28906C11.7812 1.16406 11.9297 1.08073 12.1016 1.03906C12.2734 0.997396 12.4453 0.997396 12.6172 1.03906C12.7891 1.08073 12.9401 1.16927 13.0703 1.30469C13.2005 1.42969 13.2865 1.57812 13.3281 1.75C13.375 1.92188 13.375 2.09375 13.3281 2.26562C13.2865 2.4375 13.2031 2.58594 13.0781 2.71094L8.42969 7.36719L13.0781 12.0312C13.2031 12.1562 13.2865 12.3047 13.3281 12.4766C13.3698 12.6484 13.3698 12.8203 13.3281 12.9922C13.2865 13.1641 13.2005 13.3151 13.0703 13.4453C12.9401 13.5755 12.7891 13.6615 12.6172 13.7031C12.4453 13.7448 12.2734 13.7448 12.1016 13.7031C11.9297 13.6615 11.7812 13.5781 11.6562 13.4531L7 8.79688L2.34375 13.4531C2.21875 13.5781 2.07031 13.6615 1.89844 13.7031C1.72656 13.7448 1.55208 13.7448 1.375 13.7031C1.20312 13.6615 1.05208 13.5755 0.921875 13.4453Z" fill="black"/>
+      </svg>
+    </button>
+  </form>
 </div>

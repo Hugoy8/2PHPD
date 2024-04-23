@@ -7,6 +7,10 @@
 @import '../../src/stylesheet/buttons.css';
 
 /* Element inputs en entier (Label et input) */
+.inputElement.blocked > .inputZone > input{
+  pointer-events: none;
+  user-select: none;
+}
 .inputElement{
   width: 100%;
   display: flex;

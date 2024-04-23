@@ -1,7 +1,7 @@
 import {User} from "../user/user.model";
 
 /* Le model des informations d'un tournoi */
-export interface Tournament{
+export interface Tournament {
   id: number,
   tournamentName: string,
   startDate: string,
@@ -30,4 +30,17 @@ export interface responseTournament {
   message: string,
   status: number,
   tournament: Tournament
+}
+
+/* Le model pour les différentes informations à modifier */
+export interface UpdateTournament {
+  winner?: number,
+  organizer?: number,
+  tournamentName?: string,
+  location?: string,
+  description?: string,
+  maxParticipants?: number,
+  startDate?: string,
+  endDate?: string,
+  sport?: string
 }

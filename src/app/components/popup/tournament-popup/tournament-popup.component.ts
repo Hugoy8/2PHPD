@@ -8,6 +8,8 @@ import {responseTournament, Tournament} from "../../../models/tournaments/tourna
 import {User} from "../../../models/user/user.model";
 import {responseStandard} from "../../../models/response.model";
 import {UserService} from "../../../services/user/user.service";
+import {allMatchsTournament, Match} from "../../../models/tournaments/match.model";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-tournament-popup',
@@ -15,7 +17,9 @@ import {UserService} from "../../../services/user/user.service";
   imports: [
     LoaderComponent,
     NgClass,
-    DatePipe
+    DatePipe,
+    FormsModule,
+    ReactiveFormsModule
   ],
   templateUrl: './tournament-popup.component.html',
   styleUrl: './tournament-popup.component.css'
@@ -32,6 +36,21 @@ export class TournamentPopupComponent implements OnInit{
   private idTournament!: number | null;
 
   /**
+   * L'id du match à modifier.
+   */
+  private idMatchToModify!: number | null;
+
+  /**
+   * Le formulaire pour les résultats d'un match
+   */
+  public resultMatchForm!: FormGroup;
+
+  /**
+   * Le statut de la popup des résultats d'un match.
+   */
+  public statusPopupResult: boolean = false;
+
+  /**
    * Permet de changer le statut de la popup.
    */
   @Output() statusPopupChange: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -44,20 +63,54 @@ export class TournamentPopupComponent implements OnInit{
   /* Le statut de chargement pour l'inscriptio au tournoi */
   public isLoadingRegisterTournament: boolean = false;
 
+  /* Le statut de chargement pour la modification des résultats de match */
+  public isLoadingResultMatch: boolean = false;
+
   /**
    * Les informations du tournoi.
    */
   public tournamentInformation: Tournament | null = null;
 
+  /**
+   * La liste des matchs du tournoi.
+   */
+  public matchInformation: Match[] = [];
+
+  /**
+   * Les informations de l'utilisateur connecté.
+   */
+  public userInformation: User | null = null;
+
   constructor(
     private readonly tournamentService: TournamentService,
     private readonly informationPopupService: InformationPopupService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly formBuilder: FormBuilder
   ) {}
 
-  public ngOnInit(): void {
+  public async ngOnInit(): Promise<void> {
+    this.initForm();
     this.initData();
     this.emitInstance();
+
+    this.userInformation = await this.userService.user();
+  }
+
+  /**
+   * Initialisation du formulaire des résultats d'un match.
+   */
+  private initForm(): void {
+    this.resultMatchForm = this.formBuilder.group({
+      scorePlayer1: [this.getMatchById()?.scorePlayer1 ?? null, Validators.required],
+      scorePlayer2: [this.getMatchById()?.scorePlayer2 ?? null, Validators.required]
+    });
+  }
+
+  /**
+   * Permet de récupérer un match par l'identifiant de la variable de classe.
+   */
+  private getMatchById(): Match | null {
+    return this.matchInformation.find((match: Match) => match.id === this.idMatchToModify) || null;
   }
 
   /**
@@ -68,7 +121,6 @@ export class TournamentPopupComponent implements OnInit{
       this.tournamentService.getTournamentById(this.idTournament)
       .pipe(
         map((reponseData: responseTournament) => {
-          console.log(reponseData.tournament);
           this.tournamentInformation = reponseData.tournament;
         }),
         tap(() => {
@@ -78,6 +130,20 @@ export class TournamentPopupComponent implements OnInit{
           return of(error);
         })
       ).subscribe(() => {});
+
+      this.matchInformation = [];
+      this.tournamentService.getAllMatchsOfTournamentById(this.idTournament)
+        .pipe(
+          map((reponseData: allMatchsTournament) => {
+            this.matchInformation = reponseData.sport_matchs;
+          }),
+          tap(() => {
+
+          }),
+          catchError((error: any) => {
+            return of(error);
+          })
+        ).subscribe(() => {});
     }
   }
 
@@ -128,5 +194,77 @@ export class TournamentPopupComponent implements OnInit{
     } else {
       this.informationPopupService.displayPopup('Impossible de récupérer vos informations utilisateurs. Merci de ressayer plus tard !', 'error');
     }
+  }
+
+  /**
+   * Permet de changer le statut de la popup des résultats d'un match.
+   * @param idMatch L'identifiant du match.
+   */
+  public togglePopupResultMatch(idMatch?: number): void {
+    this.statusPopupResult = !this.statusPopupResult;
+    if (idMatch){
+      this.idMatchToModify = idMatch;
+      this.initForm();
+    }
+  }
+
+  /**
+   * Permet de modifier les résultats d'un match. Soumis par le formulaire.
+   */
+  public onSubmitResultMatch(): void {
+    if (this.idMatchToModify && this.idTournament){
+      this.isLoadingResultMatch = true;
+      this.tournamentService.modifyMatch(this.idMatchToModify, this.idTournament, {
+        scorePlayer1: this.resultMatchForm.value.scorePlayer1,
+        scorePlayer2: this.resultMatchForm.value.scorePlayer2
+      })
+        .pipe(
+          map((data: responseStandard) => {
+            this.informationPopupService.displayPopup('Le résultat de ce match a bien été enregistré !', 'success');
+          }),
+          tap(() => {
+            this.togglePopupResultMatch();
+            this.isLoadingResultMatch = false;
+          }),
+          catchError((error: any) => {
+            this.isLoadingResultMatch = false;
+            this.informationPopupService.displayPopup(error.error.message, 'error');
+            return of(error);
+          })
+        ).subscribe(() => {});
+    }
+  }
+
+  /**
+   * Permet de savoir si le tournoi et donc les matchs appartiennent à l'utilisateur connecté.
+   */
+  public isTournament(): boolean{
+    if (this.userInformation && this.tournamentInformation){
+      return this.tournamentInformation.organizer.id === this.userInformation.id;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Elle permet de retourner le message reçu de la part du validator du formulaire.
+   * @param controlName Nom du control du formulaire.
+   * @returns {string} Retourne le message d'erreur du validateur.
+   */
+  public getErrorMessageOfValidatorResultMatch(controlName: 'scorePlayer1' | 'scorePlayer2'): string {
+    const control = this.resultMatchForm?.get(controlName);
+    if (control && control.errors) {
+      let errorKey : string = Object.keys(control.errors)[0];
+      if (this.resultMatchForm?.get(controlName)?.value == null || this.resultMatchForm?.get(controlName)?.value === '') {
+        errorKey = Object.keys(control.errors)[1];
+      }
+
+      if (control.errors[errorKey] && control.errors[errorKey].message){
+        return control.errors[errorKey].message;
+      }
+
+      return 'Cette valeur n\'est pas valide.';
+    }
+    return 'Cette valeur n\'est pas valide.';
   }
 }

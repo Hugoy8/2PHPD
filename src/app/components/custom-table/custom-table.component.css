@@ -31,7 +31,8 @@
   width: 100%;
   height: auto;
   display: flex;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .bottom.empty{
   height: 100% !important;
@@ -82,6 +83,7 @@ thead > tr > th {
   font-weight: 500;
   white-space: nowrap;
   padding-bottom: 16px;
+  background: var(--primaryColor);
 }
 tbody > tr td > div, tbody > tr td .button {
   display: flex;
@@ -102,7 +104,11 @@ tbody > tr td > div > span, tbody > tr td .button > span{
   white-space: nowrap;
 }
 /* Les différentes status de l'action */
-tbody > tr td > .statut{
+tbody > tr td .statut{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   gap: 6px !important;
 }
 tbody > tr td .button{
@@ -119,44 +125,44 @@ tbody > tr td .button.delete:hover svg {
 tbody > tr td .button:hover svg{
   transform: translateX(4px);
 }
-tbody > tr td > .statut.comming > span{
+tbody > tr td .statut.comming > span{
   color: var(--accentColor_500);
   font-weight: 600 !important;
 }
-tbody > tr td > .statut.comming > svg > .stroke{
+tbody > tr td .statut.comming > svg > .stroke{
   stroke: var(--accentColor_500);
 }
-tbody > tr td > .statut.comming > svg > .fill{
+tbody > tr td .statut.comming > svg > .fill{
   fill: var(--accentColor_500);
 }
-tbody > tr td > .statut.waiting > span{
+tbody > tr td .statut.waiting > span{
   color: var(--warningColor);
   font-weight: 600 !important;
 }
-tbody > tr td > .statut.waiting > svg > .stroke{
+tbody > tr td .statut.waiting > svg > .stroke{
   stroke: var(--warningColor);
 }
-tbody > tr td > .statut.waiting > svg > .fill{
+tbody > tr td .statut.waiting > svg > .fill{
   fill: var(--warningColor);
 }
-tbody > tr td > .statut.success > span{
+tbody > tr td .statut.success > span{
   color: var(--successColor);
   font-weight: 600 !important;
 }
-tbody > tr td > .statut.success > svg > .stroke{
+tbody > tr td .statut.success > svg > .stroke{
   stroke: var(--successColor);
 }
-tbody > tr td > .statut.success > svg > .fill{
+tbody > tr td .statut.success > svg > .fill{
   fill: var(--successColor);
 }
-tbody > tr td > .statut.error > span{
+tbody > tr td .statut.error > span{
   color: var(--errorColor);
   font-weight: 600 !important;
 }
-tbody > tr td > .statut.error > svg > .stroke{
+tbody > tr td .statut.error > svg > .stroke{
   stroke: var(--errorColor);
 }
-tbody > tr td > .statut.error > svg > .fill{
+tbody > tr td .statut.error > svg > .fill{
   fill: var(--errorColor);
 }
 /* Le titre de la ligne */

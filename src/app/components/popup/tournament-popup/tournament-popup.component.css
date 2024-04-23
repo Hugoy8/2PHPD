@@ -1,5 +1,13 @@
 @import '../../../../stylesheet/popup.css';
 
+/* Les popups */
+.popup{
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: all 0.2s ease-in-out !important;
+}
+
 /* La card en elle même */
 .contain > .card{
   display: flex;
@@ -156,4 +164,69 @@
 }
 .status.error > svg > .fill{
   fill: var(--errorColor);
+}
+/* La partie organisation */
+.organisation > .matchs{
+  display: flex;
+  flex-direction: column !important;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 32px !important;
+  width: calc(100% - 18px) !important;
+  height: auto;
+  max-height: 200px;
+  padding-left: 18px;
+  position: relative;
+  overflow: auto;
+}
+.organisation > .matchs::before{
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 2px;
+  height: calc(100% - 4px);
+  background: var(--accentColor_500);
+}
+.organisation > .matchs > .match{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  position: relative;
+}
+.organisation > .matchs > .match > .title{
+  color: var(--accentColor_500);
+  font-size: 14px;
+  font-weight: 600;
+}
+.organisation > .matchs > .match > .date{
+  color: #707070;
+  font-size: 13px;
+  font-weight: 500;
+}
+.organisation > .matchs > .match > button{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  color: var(--secondaryColor);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0;
+}
+.organisation > .matchs > .match > button:hover svg{
+  transform: translateX(4px);
+}
+.organisation > .matchs > .match > .circle{
+  position: absolute;
+  top: 4px;
+  left: -18px;
+  width: 10px;
+  height: 10px;
+  background: var(--accentColor_500);
+  border-radius: 50%;
 }
