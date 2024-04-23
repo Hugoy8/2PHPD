@@ -5,6 +5,7 @@ import {ApiService} from "../api/api.service";
 import {responseAllTournament, responseTournament, UpdateTournament} from "../../models/tournaments/tournament.model";
 import {responseStandard} from "../../models/response.model";
 import {allMatchsTournament} from "../../models/tournaments/match.model";
+import {allRegistrationsTournament} from "../../models/tournaments/registration.model";
 
 @Injectable({
   providedIn: 'root'
@@ -79,6 +80,42 @@ export class TournamentService {
    */
   public addMatch(idTournament: number, data: {matchDate: string, player1: number, player2: number}): Observable<responseStandard> {
     return this.http.post<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/sport-matchs', data)
+  }
+
+  /**
+   * Permet de supprimer un match à partir de son id.
+   * @param idMatch L'id du match.
+   * @param idTournament L'id du tournoi.
+   */
+  public deleteMatch(idMatch: number, idTournament: number): Observable<responseStandard> {
+    return this.http.delete<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/sport-matchs/' + idMatch)
+  }
+
+  /**
+   * Permet de récupérer les inscriptions d'un tournoi.
+   * @param idTournament L'id du tournoi.
+   */
+  public getALlRegistrationOfTournament(idTournament: number): Observable<allRegistrationsTournament> {
+    return this.http.get<allRegistrationsTournament>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/registrations');
+  }
+
+  /**
+   * Permet de supprimer une inscription d'un tournoi.
+   * @param idTournament L'id du tournoi.
+   * @param idRegistration L'id de l'inscription.
+   */
+  public deleteRegistration(idTournament: number, idRegistration: number): Observable<responseStandard> {
+    return this.http.delete<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/registrations/' + idRegistration);
+  }
+
+  /**
+   * Permet de modifier une inscription d'un tournoi.
+   * @param idTournament L'id du tournoi
+   * @param idRegistration L'id de l'inscription
+   * @param data Les infos de l'inscription.
+   */
+  public modifyRegistration(idTournament: number, idRegistration: number, data: {status: 'pending' | 'registered' | 'refused'}): Observable<responseStandard> {
+    return this.http.put<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/registrations/' + idRegistration, data)
   }
 
   /**

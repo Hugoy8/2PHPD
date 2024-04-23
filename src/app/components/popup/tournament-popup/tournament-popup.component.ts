@@ -10,6 +10,7 @@ import {responseStandard} from "../../../models/response.model";
 import {UserService} from "../../../services/user/user.service";
 import {allMatchsTournament, Match} from "../../../models/tournaments/match.model";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {allRegistrationsTournament, Registration} from "../../../models/tournaments/registration.model";
 
 @Component({
   selector: 'app-tournament-popup',
@@ -286,6 +287,28 @@ export class TournamentPopupComponent implements OnInit{
             return of(error);
           })
         ).subscribe(() => {});
+    }
+  }
+
+  /**
+   * Permet de supprimer un match.
+   * @param idMatch L'identifiant du match.
+   */
+  public onSubmitDeleteMatch(idMatch: number): void {
+    if (this.idTournament){
+      this.informationPopupService.displayPopup('Ce match est en cours de suppression ...', 'information');
+      this.tournamentService.deleteMatch(idMatch, this.idTournament)
+      .pipe(
+        map((data: responseStandard) => {
+          this.informationPopupService.displayPopup('Ce match a été supprimé avec succès.', 'success');
+        }),
+        tap(() => {
+        }),
+        catchError((error: any) => {
+          this.informationPopupService.displayPopup(error.error.message, 'error');
+          return of(error);
+        })
+      ).subscribe(() => {});
     }
   }
 

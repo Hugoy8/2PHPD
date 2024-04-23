@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Tournament, UpdateTournament} from "../../models/tournaments/tournament.model";
-import {DatePipe, NgClass} from "@angular/common";
+import {Tournament} from "../../models/tournaments/tournament.model";
+import {DatePipe, JsonPipe, NgClass} from "@angular/common";
 import {TournamentService} from "../../services/tournament/tournament.service";
 import {InformationPopupService} from "../../services/popups/information-popup/information-popup.service";
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -11,9 +11,8 @@ import {User} from "../../models/user/user.model";
 import {UserService} from "../../services/user/user.service";
 import {ApiService} from "../../services/api/api.service";
 import {responseStandard} from "../../models/response.model";
-import {CustomValidators} from "../../validators/custom-validators";
 import {TournamentPopupComponent} from "../popup/tournament-popup/tournament-popup.component";
-import {isPromise} from "rxjs/internal/util/isPromise";
+import {allRegistrationsTournament, Registration} from "../../models/tournaments/registration.model";
 
 @Component({
   selector: 'app-custom-table',
@@ -25,7 +24,8 @@ import {isPromise} from "rxjs/internal/util/isPromise";
     LowercaseDirective,
     ReactiveFormsModule,
     NgClass,
-    TournamentPopupComponent
+    TournamentPopupComponent,
+    JsonPipe
   ],
   templateUrl: './custom-table.component.html',
   styleUrl: './custom-table.component.css'
@@ -39,7 +39,12 @@ export class CustomTableComponent implements OnInit{
   /**
    * Le type de tableau à afficher.
    */
-  @Input({required: true}) type!: 'tournament' | 'user';
+  @Input({required: true}) type!: 'tournament' | 'user' | 'registration';
+
+  /**
+   * L'identifiant du tournoi à forcer.
+   */
+  @Input() forceIdTournament!: number | null;
 
   /**
    * Le statut de la popup de création de tournoi.
@@ -98,6 +103,11 @@ export class CustomTableComponent implements OnInit{
   public statusPopupValidationTournament: boolean = false;
 
   /**
+   * Le statut de la popup du tableau des inscriptions.
+   */
+  public statusPopupRegistrationTable: boolean = false;
+
+  /**
    * Le statut de la popup d'un tournoi
    */
   public statusPopupTournament: boolean = false;
@@ -106,6 +116,11 @@ export class CustomTableComponent implements OnInit{
    * L'instance de la classe TournamentPopupComponent.
    */
   public instanceOfTournamentPopup: TournamentPopupComponent | null = null;
+
+  /**
+   * La liste des inscriptions d'un tournoi.
+   */
+  public registrationInformation: Registration[] = [];
 
   /**
    * Le type du role pour le formulaire de modification.
@@ -169,6 +184,26 @@ export class CustomTableComponent implements OnInit{
   }
 
   /**
+   * Permet d'initialiser les données des inscriptions.
+   */
+  private initData(): void{
+    if (this.tournamentIdToModify){
+      this.registrationInformation = [];
+      this.tournamentService.getALlRegistrationOfTournament(this.tournamentIdToModify)
+        .pipe(
+          map((reponseData: allRegistrationsTournament) => {
+            this.registrationInformation = reponseData.registrations;
+          }),
+          tap(() => {
+
+          }),
+          catchError((error: any) => {
+            return of(error);
+          })
+        ).subscribe(() => {});
+    }
+  }
+  /**
    * Permet d'initialiser le formulaire de modification de tournoi.
    */
   private initModifyForm(): void {
@@ -208,6 +243,18 @@ export class CustomTableComponent implements OnInit{
       this.roleType = 'ROLE_ADMIN';
       this.createUserForm.value.role = 'ROLE_ADMIN';
     }
+  }
+
+  /**
+   * Permet de changer le statut de la popup du tableau des inscriptions.
+   * @param idTournament L'identifiant du tournoi.
+   */
+  public togglePopupRegistrationTable(idTournament?: number): void {
+    if (idTournament){
+      this.tournamentIdToModify = idTournament;
+      this.initData();
+    }
+    this.statusPopupRegistrationTable = !this.statusPopupRegistrationTable;
   }
 
   /**
@@ -529,5 +576,77 @@ export class CustomTableComponent implements OnInit{
       return 'Cette valeur n\'est pas valide.';
     }
     return 'Cette valeur n\'est pas valide.';
+  }
+
+  /**
+   * Permet de supprimer une inscription.
+   * @param idRegistration L'identifiant de l'inscription.
+   */
+  public deleteRegistration(idRegistration: number): void {
+    if (this.forceIdTournament){
+      this.informationPopupService.displayPopup('Cette inscription est en cours de suppression ... Merci de votre patience !', 'success');
+      this.tournamentService.deleteRegistration(this.forceIdTournament, idRegistration)
+      .pipe(
+        map((data: responseStandard): void => {
+          this.informationPopupService.displayPopup('Cette inscription a bien été supprimé !', 'success');
+        }),
+        tap(() => {
+        }),
+        catchError((error: any) => {
+          this.informationPopupService.displayPopup(error.error.message, 'error');
+          return of(error);
+        })
+        ).subscribe(() => {});
+    } else {
+      this.informationPopupService.displayPopup('Il manque certains informations permettant d\'effectuer cette action', 'error');
+    }
+  }
+
+  /**
+   * Permet d'accepter une inscription.
+   * @param idRegistration L'identifiant de l'inscription.
+   */
+  public acceptRegistration(idRegistration: number): void {
+    if (this.forceIdTournament){
+      this.informationPopupService.displayPopup('Cette inscription est en cours d\'acceptation ... Merci de votre patience !', 'success');
+      this.tournamentService.modifyRegistration(this.forceIdTournament, idRegistration, { status : 'registered'})
+      .pipe(
+        map((data: responseStandard): void => {
+          this.informationPopupService.displayPopup('Cette inscription a bien été accepté', 'success');
+        }),
+        tap(() => {
+        }),
+        catchError((error: any) => {
+          this.informationPopupService.displayPopup(error.error.message, 'error');
+          return of(error);
+        })
+        ).subscribe(() => {});
+    } else {
+      this.informationPopupService.displayPopup('Il manque certains informations permettant d\'effectuer cette action', 'error');
+    }
+  }
+
+  /**
+   * Permet de refuser une inscription.
+   * @param idRegistration L'identifiant de l'inscription.
+   */
+  public refuseRegistration(idRegistration: number): void {
+    if (this.forceIdTournament){
+      this.informationPopupService.displayPopup('Cette inscription est en cours de refus ... Merci de votre patience !', 'success');
+      this.tournamentService.modifyRegistration(this.forceIdTournament, idRegistration, { status : 'refused'})
+      .pipe(
+        map((data: responseStandard): void => {
+          this.informationPopupService.displayPopup('Cette inscription a bien été refusé !', 'success');
+        }),
+        tap(() => {
+        }),
+        catchError((error: any) => {
+          this.informationPopupService.displayPopup(error.error.message, 'error');
+          return of(error);
+        })
+        ).subscribe(() => {});
+    } else {
+      this.informationPopupService.displayPopup('Il manque certains informations permettant d\'effectuer cette action', 'error');
+    }
   }
 }

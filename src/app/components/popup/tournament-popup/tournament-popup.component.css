@@ -99,6 +99,11 @@
   gap: 12px;
   width: 100%;
 }
+.bottom > .information > .date > div > span{
+  color: #707070;
+  font-size: 14px;
+  font-weight: 500;
+}
 .bottom > .information > .description > .title, .bottom > .information > .date > .title, .bottom > .information > .organisation > .title{
   color: var(--secondaryColor);
   font-size: 20px;
@@ -207,7 +212,7 @@
   font-size: 13px;
   font-weight: 500;
 }
-.organisation > .matchs > .match > button{
+.organisation > .matchs > .match button{
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -218,7 +223,7 @@
   font-weight: 500;
   padding: 0;
 }
-.organisation > .matchs > .match > button:hover svg{
+.organisation > .matchs > .match button:hover svg{
   transform: translateX(4px);
 }
 .organisation > .matchs > .match > .circle{
