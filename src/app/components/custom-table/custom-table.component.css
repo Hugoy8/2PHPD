@@ -37,6 +37,9 @@
 .bottom.empty{
   height: 100% !important;
 }
+.bottom.empty2{
+  height: 300px !important;
+}
 /* Les titres et texte */
 .container > .top > span{
   color: var(--accentColor_500);

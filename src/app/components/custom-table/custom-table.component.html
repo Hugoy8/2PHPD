@@ -18,7 +18,7 @@
       </button>
     }
   </div>
-  <div class="bottom" [ngClass]="{'empty' : this.data.length <= 0}">
+  <div class="bottom" [ngClass]="{'empty' : this.data.length <= 0 && this.type != 'registration', 'empty2' : this.data.length <= 0 && this.type == 'registration'}">
     <table>
       <thead>
         <tr>
