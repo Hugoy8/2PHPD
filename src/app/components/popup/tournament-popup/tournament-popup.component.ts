@@ -46,9 +46,19 @@ export class TournamentPopupComponent implements OnInit{
   public resultMatchForm!: FormGroup;
 
   /**
+   * Le formulaire pour l'ajout d'un match
+   */
+  public addMatchForm!: FormGroup;
+
+  /**
    * Le statut de la popup des résultats d'un match.
    */
   public statusPopupResult: boolean = false;
+
+  /**
+   * Le statut de la popup de l'ajout d'un match.
+   */
+  public statusPopupAddMatch: boolean = false;
 
   /**
    * Permet de changer le statut de la popup.
@@ -65,6 +75,9 @@ export class TournamentPopupComponent implements OnInit{
 
   /* Le statut de chargement pour la modification des résultats de match */
   public isLoadingResultMatch: boolean = false;
+
+  /* Le statut de chargement pour l'ajout d'un match */
+  public isLoadingAddMatch: boolean = false;
 
   /**
    * Les informations du tournoi.
@@ -103,6 +116,12 @@ export class TournamentPopupComponent implements OnInit{
     this.resultMatchForm = this.formBuilder.group({
       scorePlayer1: [this.getMatchById()?.scorePlayer1 ?? null, Validators.required],
       scorePlayer2: [this.getMatchById()?.scorePlayer2 ?? null, Validators.required]
+    });
+
+    this.addMatchForm = this.formBuilder.group({
+      player1: [null, Validators.required],
+      player2: [null, Validators.required],
+      date: [null, Validators.required],
     });
   }
 
@@ -209,6 +228,13 @@ export class TournamentPopupComponent implements OnInit{
   }
 
   /**
+   * Permet de changer le statut de la popup de l'ajout d'un match.
+   */
+  public togglePopupAddMatch(): void {
+    this.statusPopupAddMatch = !this.statusPopupAddMatch;
+  }
+
+  /**
    * Permet de modifier les résultats d'un match. Soumis par le formulaire.
    */
   public onSubmitResultMatch(): void {
@@ -228,6 +254,34 @@ export class TournamentPopupComponent implements OnInit{
           }),
           catchError((error: any) => {
             this.isLoadingResultMatch = false;
+            this.informationPopupService.displayPopup(error.error.message, 'error');
+            return of(error);
+          })
+        ).subscribe(() => {});
+    }
+  }
+
+  /**
+   * Permet d'ajouter un match à un tournoi. Soumis par le formulaire.
+   */
+  public onSubmitAddMatch(): void {
+    if (this.idTournament){
+      this.isLoadingAddMatch = true;
+      this.tournamentService.addMatch(this.idTournament, {
+        matchDate: this.addMatchForm.value.date,
+        player1: this.addMatchForm.value.player1,
+        player2: this.addMatchForm.value.player2
+      })
+        .pipe(
+          map((data: responseStandard) => {
+            this.informationPopupService.displayPopup('Ce match a été ajouté avec succès.', 'success');
+          }),
+          tap(() => {
+            this.togglePopupAddMatch();
+            this.isLoadingAddMatch = false;
+          }),
+          catchError((error: any) => {
+            this.isLoadingAddMatch = false;
             this.informationPopupService.displayPopup(error.error.message, 'error');
             return of(error);
           })
@@ -266,5 +320,49 @@ export class TournamentPopupComponent implements OnInit{
       return 'Cette valeur n\'est pas valide.';
     }
     return 'Cette valeur n\'est pas valide.';
+  }
+
+  /**
+   * Elle permet de retourner le message reçu de la part du validator du formulaire.
+   * @param controlName Nom du control du formulaire.
+   * @returns {string} Retourne le message d'erreur du validateur.
+   */
+  public getErrorMessageOfValidatorAddMatch(controlName: 'date' | 'player1' | 'player2'): string {
+    const control = this.addMatchForm?.get(controlName);
+    if (control && control.errors) {
+      let errorKey : string = Object.keys(control.errors)[0];
+      if (this.addMatchForm?.get(controlName)?.value == null || this.addMatchForm?.get(controlName)?.value === '') {
+        errorKey = Object.keys(control.errors)[1];
+      }
+
+      if (control.errors[errorKey] && control.errors[errorKey].message){
+        return control.errors[errorKey].message;
+      }
+
+      return 'Cette valeur n\'est pas valide.';
+    }
+    return 'Cette valeur n\'est pas valide.';
+  }
+
+  /**
+   * Permet de récupérer la date de fin du tournoi. Sous le format 'YYYY-MM-DD'.
+   */
+  public getEndDate(): string {
+    if (this.tournamentInformation){
+      return new Date(this.tournamentInformation.endDate).toISOString().split('T')[0];
+    } else {
+      return '';
+    }
+  }
+
+  /**
+   * Permet de récupérer la date de début du tournoi. Sous le format 'YYYY-MM-DD'.
+   */
+  public getStartDate(): string {
+    if (this.tournamentInformation){
+      return new Date(this.tournamentInformation.startDate).toISOString().split('T')[0];
+    } else {
+      return '';
+    }
   }
 }

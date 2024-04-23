@@ -82,6 +82,7 @@
           </div>
         </div>
       </div>
+      <div style="display: flex; flex-direction: row;justify-content: center;align-items: center; gap: 8px; width: 100%;">
         @if (this.tournamentInformation?.isUserRegistered == 'registered') {
           <button style="pointer-events: none" type="button" class="primaryButtonAccent security">
             Déjà inscrit
@@ -98,6 +99,13 @@
             S'inscrire
           </button>
         }
+
+        @if (this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')){
+          <button (click)="this.togglePopupAddMatch()" type="button" class="primaryButtonAccent">
+            Ajouter un match
+          </button>
+        }
+      </div>
     </div>
   </div>
 </div>
@@ -124,7 +132,7 @@
           <span>{{ this.getErrorMessageOfValidatorResultMatch('scorePlayer1') }}</span>
         </div>
       </div>
-      <div class="inputElement blocked" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')),'errorActived': !this.resultMatchForm.get('scorePlayer2')?.valid && this.resultMatchForm.get('scorePlayer2')?.touched}">
+      <div class="inputElement" [ngClass]="{'blocked' : !(this.isTournament() || (this.userInformation && this.userInformation.roles[0] == 'ROLE_ADMIN')),'errorActived': !this.resultMatchForm.get('scorePlayer2')?.valid && this.resultMatchForm.get('scorePlayer2')?.touched}">
         <div class="labelZone">
           <label for="scorePlayer2">Score joueur n°2</label>
         </div>
@@ -149,6 +157,69 @@
     }
 
     <button tabindex="-1" type="button" (click)="this.togglePopupResultMatch()" class="closeIconButton">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.921875 13.4453C0.791667 13.3151 0.705729 13.1641 0.664062 12.9922C0.622396 12.8203 0.622396 12.6484 0.664062 12.4766C0.705729 12.3047 0.789062 12.1562 0.914062 12.0312L5.57031 7.36719L0.914062 2.71094C0.789062 2.59115 0.705729 2.44531 0.664062 2.27344C0.627604 2.09635 0.627604 1.92188 0.664062 1.75C0.705729 1.57812 0.791667 1.42708 0.921875 1.29688C1.04688 1.16667 1.19531 1.08073 1.36719 1.03906C1.54427 0.997396 1.71875 0.997396 1.89062 1.03906C2.06771 1.08073 2.21875 1.16406 2.34375 1.28906L7 5.94531L11.6562 1.28906C11.7812 1.16406 11.9297 1.08073 12.1016 1.03906C12.2734 0.997396 12.4453 0.997396 12.6172 1.03906C12.7891 1.08073 12.9401 1.16927 13.0703 1.30469C13.2005 1.42969 13.2865 1.57812 13.3281 1.75C13.375 1.92188 13.375 2.09375 13.3281 2.26562C13.2865 2.4375 13.2031 2.58594 13.0781 2.71094L8.42969 7.36719L13.0781 12.0312C13.2031 12.1562 13.2865 12.3047 13.3281 12.4766C13.3698 12.6484 13.3698 12.8203 13.3281 12.9922C13.2865 13.1641 13.2005 13.3151 13.0703 13.4453C12.9401 13.5755 12.7891 13.6615 12.6172 13.7031C12.4453 13.7448 12.2734 13.7448 12.1016 13.7031C11.9297 13.6615 11.7812 13.5781 11.6562 13.4531L7 8.79688L2.34375 13.4531C2.21875 13.5781 2.07031 13.6615 1.89844 13.7031C1.72656 13.7448 1.55208 13.7448 1.375 13.7031C1.20312 13.6615 1.05208 13.5755 0.921875 13.4453Z" fill="black"/>
+      </svg>
+    </button>
+  </form>
+</div>
+
+<!-- Popup pour l'ajout d'un match -->
+<div class="contain popup" [ngClass]="{'actived' : this.statusPopupAddMatch}">
+  <form [formGroup]="this.addMatchForm" (ngSubmit)="this.onSubmitAddMatch()" class="card" style="width: 450px; gap: 40px;padding: 64px; justify-content: flex-start; align-items: flex-start">
+    <span>Ajouter un match</span>
+    <div class="inputsContainer" style="gap: 16px">
+      <div class="inputElement" [ngClass]="{'errorActived': !this.addMatchForm.get('date')?.valid && this.addMatchForm.get('date')?.touched}">
+        <div class="labelZone">
+          <label for="date">Date du match</label>
+        </div>
+        <div class="inputZone">
+          <input tabindex="1" type="date" id="date" formControlName="date" [min]="this.getStartDate()" [max]="this.getEndDate()">
+        </div>
+        <div class="errorMessage">
+          <svg width="16" height="16" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.95898 11.3066C0.962891 11.3066 0.359375 10.6152 0.359375 9.71875C0.359375 9.44336 0.429688 9.16211 0.587891 8.89844L5.13477 0.976562C5.43359 0.443359 5.96094 0.173828 6.5 0.173828C7.03906 0.173828 7.56055 0.443359 7.86523 0.976562L12.4121 8.89844C12.5586 9.15625 12.6406 9.44336 12.6406 9.71875C12.6406 10.6152 12.0371 11.3066 11.041 11.3066H1.95898ZM6.50586 7.39258C6.79297 7.39258 6.96289 7.22266 6.96875 6.90625L7.05664 3.72461C7.0625 3.41406 6.81641 3.18555 6.5 3.18555C6.17188 3.18555 5.94336 3.4082 5.94922 3.71875L6.02539 6.90625C6.03125 7.2168 6.20117 7.39258 6.50586 7.39258ZM6.50586 9.35547C6.85156 9.35547 7.15625 9.08008 7.15625 8.72852C7.15625 8.37109 6.85742 8.0957 6.50586 8.0957C6.14844 8.0957 5.84961 8.37695 5.84961 8.72852C5.84961 9.07422 6.1543 9.35547 6.50586 9.35547Z" fill="#FF1000"/>
+          </svg>
+          <span>{{ this.getErrorMessageOfValidatorAddMatch('date') }}</span>
+        </div>
+      </div>
+      <div class="inputElement" [ngClass]="{'errorActived': !this.addMatchForm.get('player1')?.valid && this.addMatchForm.get('player1')?.touched}">
+        <div class="labelZone">
+          <label for="player1">Participant 1</label>
+        </div>
+        <div class="inputZone">
+          <input tabindex="2" type="number" id="player1" formControlName="player1">
+        </div>
+        <div class="errorMessage">
+          <svg width="16" height="16" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.95898 11.3066C0.962891 11.3066 0.359375 10.6152 0.359375 9.71875C0.359375 9.44336 0.429688 9.16211 0.587891 8.89844L5.13477 0.976562C5.43359 0.443359 5.96094 0.173828 6.5 0.173828C7.03906 0.173828 7.56055 0.443359 7.86523 0.976562L12.4121 8.89844C12.5586 9.15625 12.6406 9.44336 12.6406 9.71875C12.6406 10.6152 12.0371 11.3066 11.041 11.3066H1.95898ZM6.50586 7.39258C6.79297 7.39258 6.96289 7.22266 6.96875 6.90625L7.05664 3.72461C7.0625 3.41406 6.81641 3.18555 6.5 3.18555C6.17188 3.18555 5.94336 3.4082 5.94922 3.71875L6.02539 6.90625C6.03125 7.2168 6.20117 7.39258 6.50586 7.39258ZM6.50586 9.35547C6.85156 9.35547 7.15625 9.08008 7.15625 8.72852C7.15625 8.37109 6.85742 8.0957 6.50586 8.0957C6.14844 8.0957 5.84961 8.37695 5.84961 8.72852C5.84961 9.07422 6.1543 9.35547 6.50586 9.35547Z" fill="#FF1000"/>
+          </svg>
+          <span>{{ this.getErrorMessageOfValidatorAddMatch('player1') }}</span>
+        </div>
+      </div>
+      <div class="inputElement" [ngClass]="{'errorActived': !this.addMatchForm.get('player2')?.valid && this.addMatchForm.get('player2')?.touched}">
+        <div class="labelZone">
+          <label for="player2">Participant 2</label>
+        </div>
+        <div class="inputZone">
+          <input tabindex="3" type="number" id="player2" formControlName="player2">
+        </div>
+        <div class="errorMessage">
+          <svg width="16" height="16" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.95898 11.3066C0.962891 11.3066 0.359375 10.6152 0.359375 9.71875C0.359375 9.44336 0.429688 9.16211 0.587891 8.89844L5.13477 0.976562C5.43359 0.443359 5.96094 0.173828 6.5 0.173828C7.03906 0.173828 7.56055 0.443359 7.86523 0.976562L12.4121 8.89844C12.5586 9.15625 12.6406 9.44336 12.6406 9.71875C12.6406 10.6152 12.0371 11.3066 11.041 11.3066H1.95898ZM6.50586 7.39258C6.79297 7.39258 6.96289 7.22266 6.96875 6.90625L7.05664 3.72461C7.0625 3.41406 6.81641 3.18555 6.5 3.18555C6.17188 3.18555 5.94336 3.4082 5.94922 3.71875L6.02539 6.90625C6.03125 7.2168 6.20117 7.39258 6.50586 7.39258ZM6.50586 9.35547C6.85156 9.35547 7.15625 9.08008 7.15625 8.72852C7.15625 8.37109 6.85742 8.0957 6.50586 8.0957C6.14844 8.0957 5.84961 8.37695 5.84961 8.72852C5.84961 9.07422 6.1543 9.35547 6.50586 9.35547Z" fill="#FF1000"/>
+          </svg>
+          <span>{{ this.getErrorMessageOfValidatorAddMatch('player2') }}</span>
+        </div>
+      </div>
+    </div>
+    <button type="submit" tabindex="4" [disabled]="this.addMatchForm.invalid" class="primaryButtonAccent">
+      @if (this.isLoadingAddMatch){
+        <app-loader [size]="25" [sizeStroke]="3"></app-loader>
+      }
+      Ajouter
+    </button>
+
+    <button tabindex="-1" type="button" (click)="this.togglePopupAddMatch()" class="closeIconButton">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0.921875 13.4453C0.791667 13.3151 0.705729 13.1641 0.664062 12.9922C0.622396 12.8203 0.622396 12.6484 0.664062 12.4766C0.705729 12.3047 0.789062 12.1562 0.914062 12.0312L5.57031 7.36719L0.914062 2.71094C0.789062 2.59115 0.705729 2.44531 0.664062 2.27344C0.627604 2.09635 0.627604 1.92188 0.664062 1.75C0.705729 1.57812 0.791667 1.42708 0.921875 1.29688C1.04688 1.16667 1.19531 1.08073 1.36719 1.03906C1.54427 0.997396 1.71875 0.997396 1.89062 1.03906C2.06771 1.08073 2.21875 1.16406 2.34375 1.28906L7 5.94531L11.6562 1.28906C11.7812 1.16406 11.9297 1.08073 12.1016 1.03906C12.2734 0.997396 12.4453 0.997396 12.6172 1.03906C12.7891 1.08073 12.9401 1.16927 13.0703 1.30469C13.2005 1.42969 13.2865 1.57812 13.3281 1.75C13.375 1.92188 13.375 2.09375 13.3281 2.26562C13.2865 2.4375 13.2031 2.58594 13.0781 2.71094L8.42969 7.36719L13.0781 12.0312C13.2031 12.1562 13.2865 12.3047 13.3281 12.4766C13.3698 12.6484 13.3698 12.8203 13.3281 12.9922C13.2865 13.1641 13.2005 13.3151 13.0703 13.4453C12.9401 13.5755 12.7891 13.6615 12.6172 13.7031C12.4453 13.7448 12.2734 13.7448 12.1016 13.7031C11.9297 13.6615 11.7812 13.5781 11.6562 13.4531L7 8.79688L2.34375 13.4531C2.21875 13.5781 2.07031 13.6615 1.89844 13.7031C1.72656 13.7448 1.55208 13.7448 1.375 13.7031C1.20312 13.6615 1.05208 13.5755 0.921875 13.4453Z" fill="black"/>
       </svg>

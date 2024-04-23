@@ -73,6 +73,15 @@ export class TournamentService {
   }
 
   /**
+   * Permet d'ajouter un match à un tournoi.
+   * @param idTournament L'id du tournoi.
+   * @param data Les infos du match.
+   */
+  public addMatch(idTournament: number, data: {matchDate: string, player1: number, player2: number}): Observable<responseStandard> {
+    return this.http.post<responseStandard>(this.apiService.getUrlApi + 'api/tournaments/' + idTournament + '/sport-matchs', data)
+  }
+
+  /**
    * Permet de créer un tournoi.
    * @param name Le nom du tournoi.
    * @param description La description du tournoi.
