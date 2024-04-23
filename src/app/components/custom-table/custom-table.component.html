@@ -78,7 +78,7 @@
                     <span>Terminé</span>
                   </div>
                 } @else if (tournamentElement?.status == 'Ongoing') {
-                  <div class="statut comming" style="cursor: pointer" (click)="this.togglePopupTournament(tournamentElement?.id)">
+                  <div class="statut comming">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle class="fill" cx="7" cy="7" r="3.5" fill="#5398FF"/>
                       <circle class="stroke" cx="7" cy="7" r="5" stroke="#5398FF" stroke-opacity="0.5" stroke-width="3"/>
@@ -86,7 +86,7 @@
                     <span>En cours</span>
                   </div>
                 } @else if (tournamentElement?.status == 'Upcoming') {
-                  <div class="statut waiting" style="cursor: pointer" (click)="this.togglePopupTournament(tournamentElement?.id)">
+                  <div class="statut waiting">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle class="fill" cx="7" cy="7" r="3.5" fill="#5398FF"/>
                       <circle class="stroke" cx="7" cy="7" r="5" stroke="#5398FF" stroke-opacity="0.5" stroke-width="3"/>
