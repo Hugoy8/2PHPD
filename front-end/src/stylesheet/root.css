@@ -1,0 +1,38 @@
+:root{
+  --bodyColor: #F9FAFA;
+
+  /* Couleur Primaire */
+  --primaryColor: #FFF;
+
+  /* Couleur Secondaire */
+  --secondaryColor: #000;
+
+  /* Couleurs Annexe */
+  --successColor: #10B954;
+  --errorColor: #FF3737;
+  --warningColor: #FFBB37;
+  --informationColor: #5398FF;
+
+  --accentColor_500: #5398FF;
+  /* Couleurs de Texte */
+  --textFullBlack: #000000;
+  --textGray: #969696;
+
+  /* Couleurs Input */
+  --inputBackgroundColor: #252525;
+  --inputStrokeColor: #474747;
+
+  /* Fonds */
+  --secondaryButtonBackground: rgba(255, 255, 255, 0.15);
+  --darkGrayColorGame: #2A2A2A;
+
+  /* Border Radius */
+  --borderRadiusTiny: 4px;
+  --borderRadiusSmall: 6px;
+  --borderRadiusStandard: 8px;
+  --borderRadiusBig: 12px;
+  --borderRadiusHeavy: 16px;
+
+  /* Polices */
+  --fontSFProDisplay: 'SF Pro Display', sans-serif;
+}
