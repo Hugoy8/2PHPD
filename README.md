@@ -16,7 +16,7 @@ Commandes nécessaires pour installer le projet :
 
 1. **Clonez le dépôt Git :**
    ```bash
-   git clone https://github.com/Hugoy8/2PHPD.git
+   git clone https://github.com/Hugoy8/Scorelt.git
    git checkout back
    ```
 
@@ -86,7 +86,7 @@ Suivez ces étapes pour installer et configurer Scorelt :
 
 1. **Clonez le dépôt Git :**
    ```bash
-   git clone https://github.com/Hugoy8/2PHPD.git
+   git clone https://github.com/Hugoy8/Scorelt.git
    git checkout front
    ```
 
